@@ -3,20 +3,5 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/spa",
   "installCommand": "npm install",
-  "framework": "vite",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "functions": {
-    "api/index.js": {
-      "runtime": "@vercel/node@3.0.0"
-    }
-  }
+  "framework": "vite"
 }
