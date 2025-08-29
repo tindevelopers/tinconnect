@@ -1,9 +1,10 @@
 import { RequestHandler } from "express";
 import { DemoResponse } from "@shared/api";
 
-export const handleDemo: RequestHandler = (req, res) => {
+export const handleDemo: RequestHandler = (_req, res) => {
   const response: DemoResponse = {
-    message: "Hello from Express server",
+    message: "Hello from the multi-tenant video platform!",
+    timestamp: new Date().toISOString(),
   };
-  res.status(200).json(response);
+  res.json(response);
 };
