@@ -258,8 +258,8 @@ export default function Index() {
               <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-purple-600">🗄️</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">AWS DynamoDB</h3>
-              <p className="text-sm text-gray-600">Scalable NoSQL database</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Supabase</h3>
+              <p className="text-sm text-gray-600">PostgreSQL with real-time features</p>
             </div>
           </div>
         </div>
@@ -318,7 +318,7 @@ export default function Index() {
                 <li>React 18</li>
                 <li>Express.js</li>
                 <li>Amazon Chime SDK</li>
-                <li>AWS DynamoDB</li>
+                <li>Supabase</li>
               </ul>
             </div>
             <div>
