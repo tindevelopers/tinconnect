@@ -4,6 +4,10 @@ import { Database } from '../../server/lib/database.types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug logging
+console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Not set');
+console.log('Supabase Anon Key:', supabaseAnonKey ? 'Set' : 'Not set');
+
 // Only check for environment variables at runtime, not during build
 const checkEnvVars = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
