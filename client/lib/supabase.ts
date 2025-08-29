@@ -1,27 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '../../server/lib/database.types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// Only check for environment variables at runtime, not during build
+const checkEnvVars = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set');
+  }
+};
 
 // Create Supabase client for frontend
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
   }
-});
+);
 
 // Auth helper functions
 export const signUp = async (email: string, password: string, userData: {
   name: string;
   tenant_id: string;
 }) => {
+  checkEnvVars();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -33,6 +41,7 @@ export const signUp = async (email: string, password: string, userData: {
 };
 
 export const signIn = async (email: string, password: string) => {
+  checkEnvVars();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -41,16 +50,19 @@ export const signIn = async (email: string, password: string) => {
 };
 
 export const signOut = async () => {
+  checkEnvVars();
   const { error } = await supabase.auth.signOut();
   return { error };
 };
 
 export const resetPassword = async (email: string) => {
+  checkEnvVars();
   const { data, error } = await supabase.auth.resetPasswordForEmail(email);
   return { data, error };
 };
 
 export const updatePassword = async (password: string) => {
+  checkEnvVars();
   const { data, error } = await supabase.auth.updateUser({
     password
   });
@@ -59,6 +71,7 @@ export const updatePassword = async (password: string) => {
 
 // User context helper
 export const getUserContext = async (userId: string) => {
+  checkEnvVars();
   const { data, error } = await supabase
     .from('users')
     .select(`
@@ -78,6 +91,7 @@ export const getUserContext = async (userId: string) => {
 
 // Real-time subscriptions
 export const subscribeToMeetingUpdates = (meetingId: string, callback: (payload: any) => void) => {
+  checkEnvVars();
   return supabase
     .channel(`meeting:${meetingId}`)
     .on(
@@ -94,6 +108,7 @@ export const subscribeToMeetingUpdates = (meetingId: string, callback: (payload:
 };
 
 export const subscribeToParticipantUpdates = (meetingId: string, callback: (payload: any) => void) => {
+  checkEnvVars();
   return supabase
     .channel(`participants:${meetingId}`)
     .on(
@@ -110,6 +125,7 @@ export const subscribeToParticipantUpdates = (meetingId: string, callback: (payl
 };
 
 export const subscribeToChatMessages = (meetingId: string, callback: (payload: any) => void) => {
+  checkEnvVars();
   return supabase
     .channel(`chat:${meetingId}`)
     .on(

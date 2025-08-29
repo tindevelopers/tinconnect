@@ -1,24 +1,33 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// Only check for environment variables at runtime, not during build
+const checkEnvVars = () => {
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set');
+  }
+};
 
 // Create Supabase client with service role key for server-side operations
-export const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseServiceKey || 'placeholder-service-key',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
   }
-});
+);
 
 // Create Supabase client for user operations (with user context)
 export const createUserClient = (accessToken: string) => {
-  return createClient<Database>(supabaseUrl, process.env.SUPABASE_ANON_KEY!, {
+  checkEnvVars();
+  return createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
     global: {
       headers: {
         Authorization: `Bearer ${accessToken}`
@@ -29,6 +38,7 @@ export const createUserClient = (accessToken: string) => {
 
 // Helper function to get user from JWT token
 export const getUserFromToken = async (accessToken: string) => {
+  checkEnvVars();
   try {
     const { data: { user }, error } = await supabase.auth.getUser(accessToken);
     if (error) throw error;
@@ -41,6 +51,7 @@ export const getUserFromToken = async (accessToken: string) => {
 
 // Helper function to get user's tenant context
 export const getUserTenantContext = async (userId: string) => {
+  checkEnvVars();
   try {
     const { data: user, error } = await supabase
       .from('users')
