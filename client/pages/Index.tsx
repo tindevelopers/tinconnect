@@ -40,7 +40,9 @@ export default function Index() {
           </div>
           <div className="flex items-center space-x-3">
             <Button variant="ghost">Sign In</Button>
-            <Button>Get Started</Button>
+            <Button>
+              <a href="/dashboard">Get Started</a>
+            </Button>
           </div>
         </div>
       </nav>
