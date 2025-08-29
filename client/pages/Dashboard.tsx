@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Video, Users, Calendar, Settings, Plus } from "lucide-react";
 
 export default function Dashboard() {
@@ -80,15 +86,14 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>This page is a placeholder</CardTitle>
             <CardDescription>
-              Continue prompting to have me build out the dashboard functionality with meeting management, 
-              user administration, and Amazon Chime SDK integration.
+              Continue prompting to have me build out the dashboard
+              functionality with meeting management, user administration, and
+              Amazon Chime SDK integration.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-gray-600">
-                This dashboard will include:
-              </p>
+              <p className="text-gray-600">This dashboard will include:</p>
               <ul className="list-disc pl-6 space-y-2 text-gray-600">
                 <li>Meeting scheduling and management</li>
                 <li>User and organization administration</li>
