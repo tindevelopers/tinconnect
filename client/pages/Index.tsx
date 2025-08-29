@@ -1,51 +1,35 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Video, 
-  Users, 
-  Building, 
-  Shield, 
-  Zap, 
-  Globe,
-  ArrowRight,
-  Play
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-export default function Index() {
+// Debug logging
+console.log('Index.tsx is loading...');
+
+const Index: React.FC = () => {
+  console.log('Index component rendering...');
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Video className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  TIN Connect
-                </h1>
-                <p className="text-xs text-gray-500">Multi-Tenant Video Platform</p>
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold text-gray-900">TIN Connect</h1>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Powered by Amazon Chime SDK
-              </Badge>
-              <Link to="/dashboard">
-                <Button>
-                  Launch Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+              <Link
+                to="/auth"
+                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/auth"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
+                Get Started
               </Link>
             </div>
           </div>
@@ -53,289 +37,175 @@ export default function Index() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Enterprise Video Conferencing
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                Made Simple
-              </span>
+      <main>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+              <span className="block">Professional</span>
+              <span className="block text-blue-600">Video Conferencing</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              A production-ready multi-tenant video platform built with React, Express, and Amazon Chime SDK. 
-              Perfect for organizations that need secure, scalable video conferencing.
+            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+              Multi-tenant video conferencing platform with real-time collaboration features, 
+              built for modern teams and organizations.
             </p>
-            <div className="flex items-center justify-center space-x-4">
-              <Link to="/dashboard">
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                  <Play className="mr-2 h-5 w-5" />
-                  Try Demo
-                </Button>
-              </Link>
-              <Button size="lg" variant="outline">
-                View Documentation
-              </Button>
+            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+              <div className="rounded-md shadow">
+                <Link
+                  to="/auth"
+                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
+                >
+                  Start Free Trial
+                </Link>
+              </div>
+              <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                <Link
+                  to="/dashboard"
+                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
+                >
+                  View Demo
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Built for Enterprise
-            </h2>
-            <p className="text-xl text-gray-600">
-              Everything you need for secure, scalable video conferencing
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <Building className="h-6 w-6 text-blue-600" />
-                </div>
-                <CardTitle>Multi-Tenant Architecture</CardTitle>
-                <CardDescription>
-                  Complete tenant isolation with custom domains, settings, and user management per organization.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• Tenant-specific configurations</li>
-                  <li>• Custom domain support</li>
-                  <li>• Isolated data storage</li>
-                  <li>• Role-based access control</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <Video className="h-6 w-6 text-green-600" />
-                </div>
-                <CardTitle>Real-time Video Conferencing</CardTitle>
-                <CardDescription>
-                  Powered by Amazon Chime SDK for enterprise-grade video quality and reliability.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• HD video and audio</li>
-                  <li>• Screen sharing</li>
-                  <li>• Chat functionality</li>
-                  <li>• Meeting recording</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="h-6 w-6 text-purple-600" />
-                </div>
-                <CardTitle>Enterprise Security</CardTitle>
-                <CardDescription>
-                  Built with security in mind, featuring encryption, access controls, and compliance features.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• End-to-end encryption</li>
-                  <li>• AWS security standards</li>
-                  <li>• Data isolation</li>
-                  <li>• Audit logging</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-orange-600" />
-                </div>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>
-                  Comprehensive user management with roles, permissions, and team organization.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• Role-based permissions</li>
-                  <li>• Team management</li>
-                  <li>• User provisioning</li>
-                  <li>• Activity tracking</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-red-600" />
-                </div>
-                <CardTitle>Scalable Infrastructure</CardTitle>
-                <CardDescription>
-                  Built on AWS for automatic scaling, high availability, and global reach.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• Auto-scaling</li>
-                  <li>• Global CDN</li>
-                  <li>• High availability</li>
-                  <li>• Performance monitoring</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                  <Globe className="h-6 w-6 text-indigo-600" />
-                </div>
-                <CardTitle>Modern Technology Stack</CardTitle>
-                <CardDescription>
-                  Built with React, TypeScript, and modern web technologies for the best developer experience.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• React 18 + TypeScript</li>
-                  <li>• Express.js backend</li>
-                  <li>• TailwindCSS styling</li>
-                  <li>• Component library</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Tech Stack Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Technology Stack
-            </h2>
-            <p className="text-xl text-gray-600">
-              Built with modern, proven technologies
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-blue-600">⚛️</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">React 18</h3>
-              <p className="text-sm text-gray-600">Modern UI with TypeScript</p>
+        {/* Features Section */}
+        <div className="py-12 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="lg:text-center">
+              <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
+              <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                Everything you need for professional video conferencing
+              </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-green-600">🔧</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Express.js</h3>
-              <p className="text-sm text-gray-600">Fast, unopinionated backend</p>
-            </div>
+            <div className="mt-10">
+              <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-blue-600">🔐</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Multi-tenant Security</h3>
+                  <p className="text-sm text-gray-600">Secure tenant isolation with Row Level Security</p>
+                </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-orange-600">☁️</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Amazon Chime SDK</h3>
-              <p className="text-sm text-gray-600">Enterprise video infrastructure</p>
-            </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-green-600">📹</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">HD Video Conferencing</h3>
+                  <p className="text-sm text-gray-600">Crystal clear video powered by AWS Chime SDK</p>
+                </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-purple-600">🗄️</span>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-purple-600">🗄️</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Supabase</h3>
+                  <p className="text-sm text-gray-600">PostgreSQL with real-time features</p>
+                </div>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Supabase</h3>
-              <p className="text-sm text-gray-600">PostgreSQL with real-time features</p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Experience the power of enterprise video conferencing with our multi-tenant platform.
-          </p>
-          <div className="flex items-center justify-center space-x-4">
-            <Link to="/dashboard">
-              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
-                <Play className="mr-2 h-5 w-5" />
-                Launch Demo
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-              View Documentation
-            </Button>
+        {/* Technology Stack */}
+        <div className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="lg:text-center">
+              <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Technology Stack</h2>
+              <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                Built with modern technologies
+              </p>
+            </div>
+
+            <div className="mt-10">
+              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <span className="text-lg font-bold text-blue-600">⚛️</span>
+                  </div>
+                  <p className="text-xs text-gray-600">React 18</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <span className="text-lg font-bold text-blue-600">📘</span>
+                  </div>
+                  <p className="text-xs text-gray-600">TypeScript</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <span className="text-lg font-bold text-blue-600">⚡</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Vite</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <span className="text-lg font-bold text-blue-600">🎨</span>
+                  </div>
+                  <p className="text-xs text-gray-600">TailwindCSS</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <span className="text-lg font-bold text-blue-600">🚀</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Express.js</p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <span className="text-lg font-bold text-blue-600">☁️</span>
+                  </div>
+                  <p className="text-xs text-gray-600">AWS Chime SDK</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Video className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold">TIN Connect</span>
-              </div>
-              <p className="text-gray-400">
-                Enterprise video conferencing platform built with modern technologies.
+      <footer className="bg-white">
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">TIN Connect</h3>
+              <p className="text-gray-600 mb-4">
+                Professional multi-tenant video conferencing platform built for modern teams and organizations.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Features</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>Multi-tenant Architecture</li>
-                <li>Real-time Video</li>
-                <li>User Management</li>
-                <li>Security & Compliance</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Technology</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Technology</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
                 <li>React 18</li>
+                <li>TypeScript</li>
                 <li>Express.js</li>
                 <li>Amazon Chime SDK</li>
                 <li>Supabase</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Support</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
                 <li>Documentation</li>
                 <li>API Reference</li>
-                <li>GitHub Repository</li>
-                <li>Support</li>
+                <li>Contact Support</li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 TIN Connect. Built with ❤️ using Amazon Chime SDK.</p>
+          <div className="mt-8 pt-8 border-t border-gray-200">
+            <p className="text-center text-sm text-gray-600">
+              © 2024 TIN Connect. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
     </div>
   );
-}
+};
+
+export default Index;

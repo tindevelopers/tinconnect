@@ -23,6 +23,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   console.log('ProtectedRoute component rendered, user:', user, 'loading:', loading);
 
   if (loading) {
+    console.log('ProtectedRoute: showing loading spinner');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -31,9 +32,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!user) {
+    console.log('ProtectedRoute: redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
+  console.log('ProtectedRoute: rendering children');
   return <>{children}</>;
 };
 
@@ -63,15 +66,21 @@ function AppRoutes() {
 export default function App() {
   console.log('App component rendering...');
   
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppRoutes />
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+  try {
+    console.log('App: Creating QueryClientProvider...');
+    return (
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    );
+  } catch (error) {
+    console.error('App: Error rendering app:', error);
+    return <div>Error loading app: {error.message}</div>;
+  }
 }
