@@ -264,8 +264,10 @@ export default function Index() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 py-6">
-              Start Building Now
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <a href="/dashboard" className="flex items-center">
+                Start Building Now
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </a>
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-6">
               View Documentation
