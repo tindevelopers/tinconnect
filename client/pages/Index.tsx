@@ -36,7 +36,7 @@ export default function Index() {
               <Video className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              StreamMeet
+              TIN CONNECT
             </span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
@@ -106,7 +106,7 @@ export default function Index() {
                 <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
-              <div className="text-white text-sm">StreamMeet Conference</div>
+              <div className="text-white text-sm">TIN CONNECT Conference</div>
               <div className="flex items-center space-x-2">
                 <Monitor className="w-4 h-4 text-gray-400" />
                 <Users className="w-4 h-4 text-gray-400" />
@@ -357,7 +357,7 @@ export default function Index() {
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <Video className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">StreamMeet</span>
+                <span className="text-xl font-bold">TIN CONNECT</span>
               </div>
               <p className="text-gray-400">
                 Enterprise video conferencing platform built on Amazon Chime SDK
@@ -440,7 +440,7 @@ export default function Index() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 StreamMeet. All rights reserved.</p>
+            <p>&copy; 2024 TIN CONNECT. All rights reserved.</p>
           </div>
         </div>
       </footer>
