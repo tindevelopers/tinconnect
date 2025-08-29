@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, getUserContext } from '../lib/supabase';
+import { supabase, getUserContext, signIn as signInHelper, signUp as signUpHelper, signOut as signOutHelper, resetPassword as resetPasswordHelper } from '../lib/supabase';
 import { Tenant, User as UserProfile } from '../../server/lib/database.types';
 
 interface AuthContextType {
@@ -39,15 +39,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await loadUserContext(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await loadUserContext(session.user.id);
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     getInitialSession();
@@ -90,35 +94,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    return { error };
+    return await signInHelper(email, password);
   };
 
   const signUp = async (email: string, password: string, userData: { name: string; tenant_id: string }) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: userData
-      }
-    });
-    return { error };
+    return await signUpHelper(email, password, userData);
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    return await signOutHelper();
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    return { error };
+    return await resetPasswordHelper(email);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     userProfile,
     tenant,
@@ -127,7 +118,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signIn,
     signUp,
     signOut,
-    resetPassword,
+    resetPassword
   };
 
   return (
