@@ -223,29 +223,48 @@ export const getUserContext = async (userId: string) => {
 
   try {
     console.log("getUserContext: Attempting to fetch user from users table...");
-    // First, try to get the user from the users table with timeout
-    const queryPromise = supabase
-      .from("users")
-      .select(
-        `
-        *,
-        tenants (
-          id,
-          name,
-          domain,
-          settings
+    // First, try to get the user from the users table with timeout and retry
+    const makeQuery = () =>
+      supabase
+        .from("users")
+        .select(
+          `
+          *,
+          tenants (
+            id,
+            name,
+            domain,
+            settings
+          )
+        `,
         )
-      `,
-      )
-      .eq("id", userId)
-      .single();
+        .eq("id", userId)
+        .single();
 
-    // Return a value on timeout instead of throwing to avoid breaking the flow
-    const timeoutResult = new Promise<{ data: null; error: { message: string; code: string } }>((resolve) => {
-      setTimeout(() => resolve({ data: null, error: { message: "Database query timeout", code: "TIMEOUT" } }), 5000);
-    });
+    const withTimeout = (p: Promise<any>) =>
+      Promise.race([
+        p,
+        new Promise<{ data: null; error: { message: string; code: string } }>((resolve) =>
+          setTimeout(
+            () => resolve({ data: null, error: { message: "Database query timeout", code: "TIMEOUT" } }),
+            10000,
+          ),
+        ),
+      ]);
 
-    const { data, error } = (await Promise.race([queryPromise, timeoutResult])) as any;
+    let data: any = null;
+    let error: any = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const result = (await withTimeout(makeQuery())) as any;
+      data = result.data;
+      error = result.error;
+      if (data) break;
+      if (error && error.code === "TIMEOUT") {
+        console.warn(`getUserContext: Attempt ${attempt} timed out, retrying...`);
+        continue;
+      }
+      break;
+    }
 
     // If user doesn't exist in users table, create them
     if (error && error.code === 'PGRST116') {
@@ -358,10 +377,11 @@ export const getUserContext = async (userId: string) => {
 
     if (error) {
       const readableError = (error as any)?.message || (error as any)?.hint || (error as any)?.details || JSON.stringify(error);
-      console.error("getUserContext: Error getting user context:", readableError);
+      const isTimeout = String(readableError).toLowerCase().includes('timeout') || (error as any)?.code === 'TIMEOUT';
+      (isTimeout ? console.warn : console.error)("getUserContext: Error getting user context:", readableError);
 
       // If it's a timeout or connection error, try to create a basic user context
-      if (readableError?.includes('timeout') || readableError?.includes('network')) {
+      if (isTimeout || String(readableError).toLowerCase().includes('network')) {
         console.log("getUserContext: Database timeout/error, creating fallback user context...");
         return {
           data: {
