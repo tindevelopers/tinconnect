@@ -170,9 +170,9 @@ export default function EnhancedMeeting() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {/* Left Sidebar - Controls */}
-      <div className="w-24 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-6">
+      <div className="w-full lg:w-24 bg-white border-r lg:border-r border-b lg:border-b-0 border-gray-200 flex lg:flex-col flex-row items-center justify-around lg:justify-start py-4 lg:py-6 space-x-4 lg:space-x-0 lg:space-y-6">
         {/* Share Screen */}
         <button 
           onClick={toggleScreenShare}
