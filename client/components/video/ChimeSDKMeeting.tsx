@@ -116,6 +116,7 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
   };
 
   const setupObservers = () => {
+    console.log('=== setupObservers function called ===');
     if (!audioVideoRef.current) return;
 
     console.log('Setting up observers...');
@@ -163,7 +164,9 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
     };
 
     // Add observers - only use available methods
+    console.log('Adding audio video observer...');
     audioVideoRef.current.addObserver(audioVideoObserver);
+    console.log('Adding device change observer...');
     audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
 
     // Note: Video tile observer is not available in this version
