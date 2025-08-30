@@ -94,6 +94,24 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
     }
   };
 
+  // Effect to bind video element when camera stream is available
+  useEffect(() => {
+    if (cameraStream && localVideoRef.current) {
+      console.log('Binding camera stream to video element');
+      localVideoRef.current.srcObject = cameraStream;
+    } else if (cameraStream && !localVideoRef.current) {
+      // Retry mechanism if video element isn't ready yet
+      console.log('Video element not ready, retrying in 100ms');
+      const timer = setTimeout(() => {
+        if (localVideoRef.current) {
+          console.log('Binding camera stream to video element (retry)');
+          localVideoRef.current.srcObject = cameraStream;
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [cameraStream]);
+
   const startMeetingWithPreview = async () => {
     setShowCameraPreview(false);
     setIsConnecting(true);
@@ -479,6 +497,9 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
                     muted
                     playsInline
                     className="w-full h-full object-cover"
+                    onLoadedMetadata={() => console.log('Video metadata loaded')}
+                    onCanPlay={() => console.log('Video can play')}
+                    onError={(e) => console.error('Video error:', e)}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-400">
