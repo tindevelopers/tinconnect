@@ -63,29 +63,12 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Stop the test stream
       stream.getTracks().forEach(track => track.stop());
       
-      // Enumerate devices
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      const audioDevices = devices.filter(device => device.kind === 'audioinput');
-      
-      console.log('Available video devices:', videoDevices.length);
-      console.log('Available audio devices:', audioDevices.length);
-      
-      if (videoDevices.length === 0) {
-        throw new Error('No camera found. Please connect a camera and try again.');
-      }
-      
-      if (audioDevices.length === 0) {
-        throw new Error('No microphone found. Please connect a microphone and try again.');
-      }
-      
-      console.log('Device check passed');
+      console.log('Camera and microphone permissions granted');
+      return true;
     } catch (error) {
-      console.error('Device check failed:', error);
-      if (error instanceof Error) {
-        throw new Error(`Device access failed: ${error.message}`);
-      }
-      throw new Error('Failed to access camera and microphone. Please check permissions.');
+      console.error('Error checking devices:', error);
+      setConnectionError('Camera and microphone access is required. Please allow permissions and try again.');
+      return false;
     }
   };
 
@@ -194,6 +177,13 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
     try {
       console.log('Starting meeting...');
 
+      // Check permissions before starting
+      const hasPermissions = await checkAvailableDevices();
+      if (!hasPermissions) {
+        setIsConnecting(false);
+        return;
+      }
+
       // Start audio video
       await audioVideoRef.current.start();
 
@@ -211,7 +201,22 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
 
     } catch (error) {
       console.error('Error starting meeting:', error);
-      setConnectionError('Failed to start meeting. Please check your camera and microphone permissions.');
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          setConnectionError('Camera and microphone access was denied. Please allow permissions in your browser settings and try again.');
+        } else if (error.name === 'NotFoundError') {
+          setConnectionError('No camera or microphone found. Please connect a device and try again.');
+        } else if (error.name === 'NotReadableError') {
+          setConnectionError('Camera or microphone is already in use by another application. Please close other apps and try again.');
+        } else {
+          setConnectionError(`Failed to start meeting: ${error.message}`);
+        }
+      } else {
+        setConnectionError('Failed to start meeting. Please check your camera and microphone permissions.');
+      }
+      
       setIsConnecting(false);
     }
   };
@@ -321,7 +326,26 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
           <h2 className="text-xl font-bold mb-4">Connection Error</h2>
           <p className="text-red-200 mb-4">{connectionError}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={async () => {
+              setConnectionError(null);
+              setIsConnecting(true);
+              
+              try {
+                // First check permissions
+                const hasPermissions = await checkAvailableDevices();
+                if (!hasPermissions) {
+                  setIsConnecting(false);
+                  return;
+                }
+                
+                // Then initialize the meeting
+                await initializeChimeMeeting();
+              } catch (error) {
+                console.error('Error in retry:', error);
+                setConnectionError('Failed to retry. Please check your browser permissions and try again.');
+                setIsConnecting(false);
+              }
+            }}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
           >
             Try Again
