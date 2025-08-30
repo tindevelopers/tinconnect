@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <div className={cn(
-      "w-80 bg-white shadow-lg border-r border-gray-200 h-full relative pt-[3px]",
+      "w-80 bg-white shadow-xl rounded-xl border border-gray-200 h-full relative pt-[3px]",
       className
     )}>
       <div className="p-6 flex flex-col justify-start items-center">
