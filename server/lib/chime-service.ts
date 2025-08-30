@@ -2,15 +2,21 @@ import { ChimeSDKMeetingsClient, CreateMeetingCommand, CreateAttendeeCommand, De
 import { ChimeMeetingResponse, ChimeAttendeeResponse } from '@shared/api';
 
 export class ChimeService {
-  private client: ChimeSDKMeetingsClient;
+  private client: ChimeSDKMeetingsClient | null = null;
+  private credentials: {
+    region: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+  } | null = null;
 
   constructor() {
     // Environment-aware configuration
     const isProduction = process.env.NODE_ENV === 'production';
     const isPreview = process.env.VERCEL_ENV === 'preview';
+    const isDevelopment = !isProduction && !isPreview;
 
     // Select environment variables based on deployment environment
-    const awsRegion = isProduction 
+    const awsRegion = isProduction
       ? process.env.AWS_REGION
       : process.env.AWS_REGION_PREVIEW || process.env.AWS_REGION;
 
@@ -28,18 +34,41 @@ export class ChimeService {
     console.log('AWS Access Key ID:', awsAccessKeyId ? 'Set' : 'Not set');
     console.log('AWS Secret Access Key:', awsSecretAccessKey ? 'Set' : 'Not set');
 
-    // Validate required environment variables
+    // In development, credentials are optional - we'll check them when actually needed
+    if (isDevelopment && (!awsAccessKeyId || !awsSecretAccessKey)) {
+      console.warn('AWS credentials not configured for development. Chime SDK features will not be available.');
+      return;
+    }
+
+    // In production/preview, credentials are required
     if (!awsAccessKeyId || !awsSecretAccessKey) {
       throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
     }
 
-    this.client = new ChimeSDKMeetingsClient({
+    // Store credentials for lazy initialization
+    this.credentials = {
       region: awsRegion || 'us-east-1',
-      credentials: {
-        accessKeyId: awsAccessKeyId,
-        secretAccessKey: awsSecretAccessKey,
-      },
-    });
+      accessKeyId: awsAccessKeyId,
+      secretAccessKey: awsSecretAccessKey,
+    };
+  }
+
+  private ensureClient(): ChimeSDKMeetingsClient {
+    if (!this.credentials) {
+      throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
+    }
+
+    if (!this.client) {
+      this.client = new ChimeSDKMeetingsClient({
+        region: this.credentials.region,
+        credentials: {
+          accessKeyId: this.credentials.accessKeyId,
+          secretAccessKey: this.credentials.secretAccessKey,
+        },
+      });
+    }
+
+    return this.client;
   }
 
   /**
