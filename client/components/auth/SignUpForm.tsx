@@ -60,28 +60,6 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onSwitchToSig
     }
   };
 
-  if (success) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>Check Your Email</CardTitle>
-          <CardDescription>
-            We've sent you a confirmation link to verify your email address.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Please check your email and click the confirmation link to complete your registration.
-          </p>
-          {onSwitchToSignIn && (
-            <Button variant="outline" onClick={onSwitchToSignIn} className="w-full">
-              Back to Sign In
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
