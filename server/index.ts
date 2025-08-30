@@ -28,6 +28,12 @@ import {
   endMeeting,
 } from "./routes/meetings.js";
 
+// Import Chime test routes
+import {
+  testChimeConnection,
+  createTestMeeting,
+} from "./routes/chime-test.js";
+
 config();
 
 export function createServer() {
@@ -59,6 +65,10 @@ export function createServer() {
   app.post("/api/tenants/:tenantId/meetings/:meetingId/join", joinMeeting);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/leave", leaveMeeting);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/end", endMeeting);
+
+  // Chime test routes
+  app.get("/api/chime/test", testChimeConnection);
+  app.post("/api/chime/test-meeting", createTestMeeting);
 
   return app;
 }
