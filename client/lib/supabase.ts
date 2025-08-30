@@ -57,6 +57,30 @@ export const supabase = createClient<Database>(
   },
 );
 
+// Session persistence utilities
+export const getStoredSession = () => {
+  try {
+    const sessionKey = `sb-${supabaseAnonKey}-auth-token`;
+    const stored = localStorage.getItem(sessionKey);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.currentSession || null;
+    }
+  } catch (error) {
+    console.warn('Error reading stored session:', error);
+  }
+  return null;
+};
+
+export const clearStoredSession = () => {
+  try {
+    const sessionKey = `sb-${supabaseAnonKey}-auth-token`;
+    localStorage.removeItem(sessionKey);
+  } catch (error) {
+    console.warn('Error clearing stored session:', error);
+  }
+};
+
 // Auth helper functions
 export const signUp = async (
   email: string,
@@ -144,10 +168,23 @@ export const signOut = async () => {
   }
 
   try {
+    console.log("signOut: Starting sign out process...");
+    
+    // Clear any stored session data
+    clearStoredSession();
+    
+    // Sign out from Supabase
     const { error } = await supabase.auth.signOut();
-    return { error };
+    
+    if (error) {
+      console.error("signOut: Supabase sign out error:", error);
+      return { error };
+    }
+    
+    console.log("signOut: Successfully signed out");
+    return { error: null };
   } catch (error) {
-    console.error("SignOut error:", error);
+    console.error("signOut: Unexpected error:", error);
     return { error: { message: "Failed to sign out" } };
   }
 };

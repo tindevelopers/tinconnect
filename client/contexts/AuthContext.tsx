@@ -7,6 +7,8 @@ import {
   signUp as signUpHelper,
   signOut as signOutHelper,
   resetPassword as resetPasswordHelper,
+  getStoredSession,
+  clearStoredSession,
 } from "../lib/supabase";
 import { Tenant, User as UserProfile } from "../../server/lib/database.types";
 
