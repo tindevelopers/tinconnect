@@ -239,12 +239,13 @@ export const getUserContext = async (userId: string) => {
       )
       .eq("id", userId)
       .single();
-    
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 second timeout
+
+    // Return a value on timeout instead of throwing to avoid breaking the flow
+    const timeoutResult = new Promise<{ data: null; error: { message: string; code: string } }>((resolve) => {
+      setTimeout(() => resolve({ data: null, error: { message: "Database query timeout", code: "TIMEOUT" } }), 5000);
     });
-    
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+
+    const { data, error } = (await Promise.race([queryPromise, timeoutResult])) as any;
 
     // If user doesn't exist in users table, create them
     if (error && error.code === 'PGRST116') {
