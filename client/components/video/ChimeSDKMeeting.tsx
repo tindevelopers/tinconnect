@@ -316,23 +316,33 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Start local video
       console.log('Starting local video tile...');
       
-      // First set the video input device, then start the video tile
+      // First start the video tile, then set the device
+      audioVideoRef.current.startLocalVideoTile();
+      console.log('Local video tile started');
+      
+      // Now set the video input device after the tile is started
       if (selectedVideoDevice) {
         console.log('Setting video input device to:', selectedVideoDevice);
         try {
-          await audioVideoRef.current.chooseVideoInputDevice(selectedVideoDevice);
-          console.log('Video input device set successfully');
-          
-          // Wait a moment for device selection to take effect
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Use the device controller to set the video input device
+          const deviceController = audioVideoRef.current.getDeviceController();
+          if (deviceController && typeof deviceController.chooseVideoInputDevice === 'function') {
+            await deviceController.chooseVideoInputDevice(selectedVideoDevice);
+            console.log('Video input device set successfully via device controller');
+          } else {
+            console.log('Device controller not available, trying direct method...');
+            // Fallback to direct method if available
+            if (typeof audioVideoRef.current.chooseVideoInputDevice === 'function') {
+              await audioVideoRef.current.chooseVideoInputDevice(selectedVideoDevice);
+              console.log('Video input device set successfully via direct method');
+            } else {
+              console.log('Video input device selection not available in this SDK version');
+            }
+          }
         } catch (error) {
           console.error('Failed to set video input device:', error);
         }
       }
-      
-      // Now start the video tile
-      audioVideoRef.current.startLocalVideoTile();
-      console.log('Local video tile started');
       
       console.log('Local video started successfully');
 
