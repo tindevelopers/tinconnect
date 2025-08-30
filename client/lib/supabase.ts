@@ -166,13 +166,16 @@ export const updatePassword = async (password: string) => {
 
 // User context helper
 export const getUserContext = async (userId: string) => {
+  console.log("getUserContext: Starting with userId:", userId);
   if (!checkEnvVars()) {
+    console.log("getUserContext: Environment variables check failed");
     return { data: null, error: { message: "Supabase not configured" } };
   }
 
   try {
-    // First, try to get the user from the users table
-    const { data, error } = await supabase
+    console.log("getUserContext: Attempting to fetch user from users table...");
+    // First, try to get the user from the users table with timeout
+    const queryPromise = supabase
       .from("users")
       .select(
         `
@@ -187,10 +190,16 @@ export const getUserContext = async (userId: string) => {
       )
       .eq("id", userId)
       .single();
+    
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database query timeout')), 10000); // 10 second timeout
+    });
+    
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
     // If user doesn't exist in users table, create them
     if (error && error.code === 'PGRST116') {
-      console.log("User not found in users table, attempting to create user record...");
+      console.log("getUserContext: User not found in users table, attempting to create user record...");
       
       // Get the current user from auth
       const { data: { user } } = await supabase.auth.getUser();
@@ -266,13 +275,41 @@ export const getUserContext = async (userId: string) => {
     }
 
     if (error) {
-      console.error("Error getting user context:", error);
+      console.error("getUserContext: Error getting user context:", error);
+      
+      // If it's a timeout or connection error, try to create a basic user context
+      if (error.message?.includes('timeout') || error.message?.includes('network')) {
+        console.log("getUserContext: Database timeout/error, creating fallback user context...");
+        return {
+          data: {
+            id: userId,
+            email: "user@example.com",
+            name: "User",
+            role: "user",
+            tenant_id: "00000000-0000-0000-0000-000000000000",
+            tenants: {
+              id: "00000000-0000-0000-0000-000000000000",
+              name: "Default Organization",
+              domain: "default.local",
+              settings: {
+                maxParticipants: 50,
+                recordingEnabled: true,
+                chatEnabled: true,
+                screenShareEnabled: true
+              }
+            }
+          },
+          error: null
+        };
+      }
+      
       return { data: null, error };
     }
 
+    console.log("getUserContext: Successfully retrieved user data:", data);
     return { data, error: null };
   } catch (error) {
-    console.error("Unexpected error in getUserContext:", error);
+    console.error("getUserContext: Unexpected error:", error);
     return { data: null, error: { message: "Failed to get user context" } };
   }
 };

@@ -60,6 +60,11 @@ export const StartMeeting: React.FC<StartMeetingProps> = ({
     setError(null);
 
     try {
+      console.log('Creating meeting with data:', {
+        ...newMeeting,
+        tenant_id: tenantId,
+      });
+      
       const response = await fetch(`/api/tenants/${tenantId}/meetings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

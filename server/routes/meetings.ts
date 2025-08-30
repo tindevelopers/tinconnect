@@ -9,8 +9,8 @@ const meetingService = new MeetingService();
 const createMeetingSchema = z.object({
   title: z.string().min(1, "Meeting title is required"),
   description: z.string().optional(),
-  hostId: z.string().min(1, "Host ID is required"),
-  scheduledAt: z.string().datetime().optional(),
+  host_id: z.string().min(1, "Host ID is required"),
+  scheduled_at: z.string().datetime().optional(),
   settings: z.object({
     recordingEnabled: z.boolean().optional(),
     chatEnabled: z.boolean().optional(),
@@ -28,7 +28,10 @@ const joinMeetingSchema = z.object({
 export const createMeeting: RequestHandler = async (req, res) => {
   try {
     const { tenantId } = req.params;
+    console.log('Create meeting request:', { tenantId, body: req.body });
+    
     const validatedData = createMeetingSchema.parse(req.body);
+    console.log('Validated data:', validatedData);
     
     const meeting = await meetingService.createMeeting({
       ...validatedData,

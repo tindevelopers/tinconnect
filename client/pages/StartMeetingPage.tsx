@@ -30,6 +30,11 @@ export default function StartMeetingPage() {
     setJoinData(null);
   };
 
+  // Debug logging
+  console.log('StartMeetingPage - User:', user);
+  console.log('StartMeetingPage - Tenant:', tenant);
+  console.log('StartMeetingPage - UserProfile:', userProfile);
+
   // If user is not authenticated, show login prompt
   if (!user || !tenant) {
     return (
