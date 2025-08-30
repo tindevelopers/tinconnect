@@ -82,12 +82,12 @@ export default function ImprovedDashboard() {
       {/* Sidebar */}
       <div className="w-full lg:w-32 bg-white border-r border-gray-200 flex lg:flex-col flex-row items-center justify-around lg:justify-start py-6 lg:space-y-4 space-x-4 lg:space-x-0">
         {/* Logo */}
-        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-8">
+        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center lg:mb-8 mb-0">
           <div className="w-8 h-8 bg-white rounded-lg"></div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col space-y-4 flex-1">
+        <nav className="flex lg:flex-col flex-row lg:space-y-4 space-x-4 lg:space-x-0 flex-1 lg:justify-start justify-center">
           {sidebarItems.map((item) => (
             <button
               key={item.id}
