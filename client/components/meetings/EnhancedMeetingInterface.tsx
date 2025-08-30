@@ -49,6 +49,10 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  
+  // Chime SDK state
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const { participants, isHost, isCoHost } = useParticipants();
 
@@ -76,6 +80,19 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
     setShowChat(!showChat);
   };
 
+  // Chime SDK control functions - these will be connected to the actual Chime SDK
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    // TODO: Connect to actual Chime SDK mute function
+    console.log('Toggle mute:', !isMuted);
+  };
+
+  const toggleVideo = () => {
+    setIsVideoEnabled(!isVideoEnabled);
+    // TODO: Connect to actual Chime SDK video toggle function
+    console.log('Toggle video:', !isVideoEnabled);
+  };
+
   return (
     <div className={cn(
       "flex h-screen bg-gray-900",
@@ -91,8 +108,8 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
           />
         </div>
         
-        {/* Meeting Info Overlay */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+        {/* Meeting Info Overlay - Fixed positioning */}
+        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="bg-black/50 text-white">
               {participants.length} participants
@@ -127,25 +144,37 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
           </div>
         </div>
 
-        {/* Meeting Controls - Fixed Layout */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="flex items-center gap-2 bg-black/50 rounded-full p-3">
+        {/* Meeting Controls - Fixed Layout and Responsive */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="flex items-center gap-2 bg-black/50 rounded-full p-3 backdrop-blur-sm">
             {/* Audio Control */}
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full bg-gray-700 text-white hover:bg-gray-600 w-12 h-12 flex items-center justify-center"
+              onClick={toggleMute}
+              className={cn(
+                "rounded-full w-12 h-12 flex items-center justify-center transition-all",
+                isMuted 
+                  ? "bg-red-600 text-white hover:bg-red-700" 
+                  : "bg-gray-700 text-white hover:bg-gray-600"
+              )}
             >
-              <Mic className="w-5 h-5" />
+              {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </Button>
             
             {/* Video Control */}
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full bg-gray-700 text-white hover:bg-gray-600 w-12 h-12 flex items-center justify-center"
+              onClick={toggleVideo}
+              className={cn(
+                "rounded-full w-12 h-12 flex items-center justify-center transition-all",
+                !isVideoEnabled 
+                  ? "bg-red-600 text-white hover:bg-red-700" 
+                  : "bg-gray-700 text-white hover:bg-gray-600"
+              )}
             >
-              <Video className="w-5 h-5" />
+              {isVideoEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
             </Button>
             
             {/* Screen Share Control */}
@@ -154,7 +183,7 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
               size="sm"
               onClick={toggleScreenSharing}
               className={cn(
-                "rounded-full w-12 h-12 flex items-center justify-center",
+                "rounded-full w-12 h-12 flex items-center justify-center transition-all",
                 isScreenSharing 
                   ? "bg-blue-600 text-white hover:bg-blue-700" 
                   : "bg-gray-700 text-white hover:bg-gray-600"
@@ -170,7 +199,7 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
                 size="sm"
                 onClick={toggleRecording}
                 className={cn(
-                  "rounded-full w-12 h-12 flex items-center justify-center",
+                  "rounded-full w-12 h-12 flex items-center justify-center transition-all",
                   isRecording 
                     ? "bg-red-600 text-white hover:bg-red-700" 
                     : "bg-gray-700 text-white hover:bg-gray-600"
@@ -188,7 +217,7 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
               variant="ghost"
               size="sm"
               onClick={onLeave}
-              className="rounded-full bg-red-600 text-white hover:bg-red-700 w-12 h-12 flex items-center justify-center"
+              className="rounded-full bg-red-600 text-white hover:bg-red-700 w-12 h-12 flex items-center justify-center transition-all"
             >
               <PhoneOff className="w-5 h-5" />
             </Button>
@@ -196,10 +225,12 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
         </div>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - Responsive */}
       <div className={cn(
         "w-80 bg-white border-l border-gray-200 flex flex-col transition-all duration-300",
-        isSidebarCollapsed && "w-16"
+        isSidebarCollapsed && "w-16",
+        "max-lg:w-64", // Smaller on large screens
+        "max-md:hidden" // Hidden on mobile
       )}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200">
@@ -359,6 +390,44 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
             </Tabs>
           </div>
         )}
+      </div>
+
+      {/* Mobile Controls - Show on mobile when sidebar is hidden */}
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-30">
+        <div className="flex items-center justify-center gap-2 bg-black/50 rounded-full p-3 backdrop-blur-sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMute}
+            className={cn(
+              "rounded-full w-10 h-10 flex items-center justify-center",
+              isMuted ? "bg-red-600 text-white" : "bg-gray-700 text-white"
+            )}
+          >
+            {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleVideo}
+            className={cn(
+              "rounded-full w-10 h-10 flex items-center justify-center",
+              !isVideoEnabled ? "bg-red-600 text-white" : "bg-gray-700 text-white"
+            )}
+          >
+            {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onLeave}
+            className="rounded-full bg-red-600 text-white w-10 h-10 flex items-center justify-center"
+          >
+            <PhoneOff className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Chat Panel (when toggled) */}

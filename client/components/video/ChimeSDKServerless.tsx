@@ -226,25 +226,186 @@ const ChimeSDKServerless: React.FC<ChimeSDKServerlessProps> = ({ meeting, onLeav
       // Create meeting session configuration
       const configuration = new MeetingSessionConfiguration(
         joinInfo.JoinInfo.Meeting,
-        joinInfo.JoinInfo.Attendee
+        joinInfo.JoinInfo.Attendee,
+        null,
+        null,
+        null
       );
 
-      // Create meeting session
-      const session = new DefaultMeetingSession(
+      // Configure the meeting session
+      configuration.enableWebAudio = true;
+      configuration.enableUnifiedPlanForChromiumBasedBrowsers = true;
+
+      // Create the meeting session
+      const meetingSession = new DefaultMeetingSession(
         configuration,
         loggerRef.current,
         deviceController
       );
 
-      setMeetingSession(session);
-      audioVideoRef.current = session.audioVideo;
+      setMeetingSession(meetingSession);
+      audioVideoRef.current = meetingSession.audioVideo;
 
       // Set up observers
-      setupObservers();
+      const audioVideoObserver: AudioVideoObserver = {
+        audioVideoDidStart: () => {
+          logMessage('Audio video started');
+          setIsConnected(true);
+          setIsConnecting(false);
+        },
+        audioVideoDidStop: (sessionStatus: any) => {
+          logMessage(`Audio video stopped: ${sessionStatus.statusCode()}`);
+          setIsConnected(false);
+          setIsConnecting(false);
+        },
+        audioVideoDidFail: (sessionStatus: any) => {
+          logMessage(`Audio video failed: ${sessionStatus.statusCode()}`);
+          setConnectionError('Meeting connection failed. Please try again.');
+          setIsConnected(false);
+          setIsConnecting(false);
+        }
+      };
 
-      logMessage('Chime meeting session initialized successfully');
-      return session;
+      const deviceChangeObserver: DeviceChangeObserver = {
+        audioInputsChanged: (freshAudioInputDeviceList: MediaDeviceInfo[]) => {
+          logMessage(`Audio inputs changed: ${freshAudioInputDeviceList.length} devices`);
+          setAvailableDevices(prev => ({
+            ...prev,
+            audioDevices: freshAudioInputDeviceList
+          }));
+        },
+        videoInputsChanged: (freshVideoInputDeviceList: MediaDeviceInfo[]) => {
+          logMessage(`Video inputs changed: ${freshVideoInputDeviceList.length} devices`);
+          setAvailableDevices(prev => ({
+            ...prev,
+            videoDevices: freshVideoInputDeviceList
+          }));
+        },
+        audioOutputsChanged: (freshAudioOutputDeviceList: MediaDeviceInfo[]) => {
+          logMessage(`Audio outputs changed: ${freshAudioOutputDeviceList.length} devices`);
+        }
+      };
 
+      // Add observers
+      audioVideoRef.current.addObserver(audioVideoObserver);
+      audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
+
+      // Video Tile Observer - Enhanced approach for better video stability
+      try {
+        // First, try the standard approach
+        if (typeof audioVideoRef.current.addVideoTileObserver === 'function') {
+          const videoTileObserver = {
+            videoTileDidUpdate: (tileState: any) => {
+              logMessage(`Video tile updated: ${tileState.tileId}, local: ${tileState.localTile}, active: ${tileState.active}`);
+              if (tileState.localTile && tileState.tileId && tileState.active) {
+                logMessage('Local video tile detected and active, binding to element...');
+                if (localVideoRef.current) {
+                  try {
+                    audioVideoRef.current.bindVideoElement(tileState.tileId, localVideoRef.current);
+                    logMessage(`Video element bound to local tile ID: ${tileState.tileId}`);
+                    
+                    // Store the current tile ID for reference
+                    setCurrentTileId(tileState.tileId);
+                  } catch (error) {
+                    console.error('Error binding video element:', error);
+                  }
+                }
+              }
+            },
+            videoTileWasRemoved: (tileId: number) => {
+              logMessage(`Video tile removed: ${tileId}`);
+              // If the removed tile was our current tile, try to restart the video tile immediately
+              if (tileId === currentTileId) {
+                logMessage('Current video tile was removed, attempting to restart immediately...');
+                setCurrentTileId(null);
+                
+                // Try to restart the local video tile immediately
+                try {
+                  if (audioVideoRef.current && typeof audioVideoRef.current.startLocalVideoTile === 'function') {
+                    audioVideoRef.current.startLocalVideoTile();
+                    logMessage('Local video tile restarted immediately after removal');
+                    
+                    // Try to rebind quickly
+                    setTimeout(() => {
+                      if (localVideoRef.current) {
+                        try {
+                          audioVideoRef.current.bindVideoElement(1, localVideoRef.current);
+                          logMessage('Video rebinding successful after immediate restart');
+                          setCurrentTileId(1);
+                        } catch (error) {
+                          logMessage(`Video binding failed after immediate restart: ${error}`);
+                          // Fallback to camera stream
+                          if (cameraStream) {
+                            localVideoRef.current.srcObject = cameraStream;
+                            logMessage('Fallback to camera stream after immediate restart');
+                          }
+                        }
+                      }
+                                       }, 25); // Even shorter delay for faster recovery
+                  }
+                } catch (error) {
+                  logMessage(`Failed to restart video tile immediately: ${error}`);
+                  // Fallback to camera stream
+                  if (localVideoRef.current && cameraStream) {
+                    logMessage('Fallback to camera stream after immediate restart failure');
+                    localVideoRef.current.srcObject = cameraStream;
+                  }
+                }
+              }
+            }
+          };
+          
+          audioVideoRef.current.addVideoTileObserver(videoTileObserver);
+          logMessage('Video tile observer added successfully');
+        } else {
+          logMessage('Video tile observer not available, will use manual binding');
+          
+          // Alternative approach: Use the meeting session's video tile observer
+          if (meetingSession && typeof meetingSession.audioVideo.addVideoTileObserver === 'function') {
+            const videoTileObserver = {
+              videoTileDidUpdate: (tileState: any) => {
+                logMessage(`Video tile updated (via session): ${tileState.tileId}, local: ${tileState.localTile}`);
+                if (tileState.localTile && tileState.tileId) {
+                  logMessage('Local video tile detected via session, binding to element...');
+                  if (localVideoRef.current) {
+                    try {
+                      meetingSession.audioVideo.bindVideoElement(tileState.tileId, localVideoRef.current);
+                      logMessage(`Video element bound to local tile ID: ${tileState.tileId}`);
+                      setCurrentTileId(tileState.tileId);
+                    } catch (error) {
+                      console.error('Error binding video element via session:', error);
+                    }
+                  }
+                }
+              },
+              videoTileWasRemoved: (tileId: number) => {
+                logMessage(`Video tile removed (via session): ${tileId}`);
+                if (tileId === currentTileId) {
+                  setCurrentTileId(null);
+                  // Try to restart the video tile
+                  setTimeout(() => {
+                    try {
+                      if (meetingSession.audioVideo && typeof meetingSession.audioVideo.startLocalVideoTile === 'function') {
+                        meetingSession.audioVideo.startLocalVideoTile();
+                        logMessage('Local video tile restarted via session after removal');
+                      }
+                    } catch (error) {
+                      logMessage(`Failed to restart video tile via session: ${error}`);
+                    }
+                  }, 500);
+                }
+              }
+            };
+            
+            meetingSession.audioVideo.addVideoTileObserver(videoTileObserver);
+            logMessage('Video tile observer added successfully via session');
+          }
+        }
+      } catch (error) {
+        logMessage(`Error setting up video tile observer: ${error}`);
+        logMessage('Will use manual binding approach');
+      }
+      logMessage('Observers set up successfully');
     } catch (error) {
       console.error('Error initializing Chime meeting:', error);
       setConnectionError(`Failed to initialize meeting: ${error instanceof Error ? error.message : 'Unknown error'}`);
