@@ -44,24 +44,48 @@ export const EnhancedMeetingDashboard: React.FC<
   }, [tenantId]);
 
   const fetchMeetings = async () => {
+    if (!tenantId) {
+      console.log("No tenantId available, skipping meeting fetch");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log(`Fetching meetings for tenant: ${tenantId}`);
       const response = await fetch(`/api/tenants/${tenantId}/meetings`);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("Meetings fetched successfully:", data);
         setMeetings(data.data || []);
+      } else {
+        console.error(`Failed to fetch meetings: ${response.status} ${response.statusText}`);
+        const errorData = await response.text();
+        console.error("Error response:", errorData);
       }
     } catch (error) {
       console.error("Error fetching meetings:", error);
+      // Set empty array so UI doesn't break
+      setMeetings([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateMeeting = async () => {
-    if (!newMeeting.title || !newMeeting.host_id) return;
+    if (!newMeeting.title || !newMeeting.host_id) {
+      console.error("Missing required fields for meeting creation");
+      return;
+    }
+
+    if (!tenantId) {
+      console.error("No tenant ID available for meeting creation");
+      return;
+    }
 
     try {
+      console.log("Creating meeting:", { tenantId, newMeeting });
       const response = await fetch(`/api/tenants/${tenantId}/meetings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,9 +97,13 @@ export const EnhancedMeetingDashboard: React.FC<
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Meeting created successfully:", data);
         setMeetings([data.data, ...meetings]);
         setNewMeeting({ title: "", description: "", host_id: "" });
         setShowCreateForm(false);
+      } else {
+        const errorData = await response.text();
+        console.error(`Failed to create meeting: ${response.status}`, errorData);
       }
     } catch (error) {
       console.error("Error creating meeting:", error);
