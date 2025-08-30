@@ -247,8 +247,8 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
     // Video Tile Observer - This is the key for proper video binding
     console.log('Adding video tile observer...');
     try {
-      audioVideoRef.current.addVideoTileObserver({
-        videoTileDidUpdate: (tileState) => {
+      const videoTileObserver = {
+        videoTileDidUpdate: (tileState: any) => {
           console.log('Video tile updated:', tileState);
           if (tileState.localTile && tileState.tileId) {
             console.log('Local video tile detected, binding to element...');
@@ -276,10 +276,12 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
             }
           }
         },
-        videoTileWasRemoved: (tileId) => {
+        videoTileWasRemoved: (tileId: number) => {
           console.log('Video tile removed:', tileId);
         }
-      });
+      };
+      
+      audioVideoRef.current.addVideoTileObserver(videoTileObserver);
       console.log('Video tile observer added successfully');
     } catch (error) {
       console.log('Video tile observer not available, will use manual binding:', error);
@@ -341,6 +343,21 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
           }
         } catch (error) {
           console.error('Failed to set video input device:', error);
+        }
+      }
+      
+      // Add a delay to ensure the video tile is properly set up
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Manual video binding fallback
+      if (localVideoRef.current) {
+        console.log('Attempting manual video binding...');
+        try {
+          // Try to bind to tile ID 1 (local video)
+          audioVideoRef.current.bindVideoElement(1, localVideoRef.current);
+          console.log('Manual video binding successful');
+        } catch (error) {
+          console.error('Manual video binding failed:', error);
         }
       }
       
