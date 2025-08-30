@@ -40,16 +40,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log('AuthContext: Getting initial session...');
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('AuthContext: Session:', session ? 'Found' : 'None');
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
+          console.log('AuthContext: Loading user context for user:', session.user.id);
           await loadUserContext(session.user.id);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
       } finally {
+        console.log('AuthContext: Setting loading to false');
         setLoading(false);
       }
     };
