@@ -3,7 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": "node",
   "functions": {
     "dist/server/node-build.mjs": {
       "runtime": "nodejs18.x"
