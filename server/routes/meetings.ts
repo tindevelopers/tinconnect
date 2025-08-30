@@ -96,7 +96,9 @@ export const getMeeting: RequestHandler = async (req, res) => {
 export const getChimeMeetingConfig: RequestHandler = async (req, res) => {
   try {
     const { meetingId } = req.params;
-    const config = await meetingService.getChimeMeetingConfig(meetingId);
+    const { userId } = req.query; // Get userId from query parameters
+    
+    const config = await meetingService.getChimeMeetingConfig(meetingId, userId as string);
     
     const response: ApiResponse<any> = {
       success: true,

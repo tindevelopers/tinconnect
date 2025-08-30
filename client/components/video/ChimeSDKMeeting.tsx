@@ -100,7 +100,7 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       console.log('Initializing meeting session...');
 
       // Get the meeting configuration from the server
-      const response = await fetch(`/api/meetings/${meeting.id}/chime-config`);
+      const response = await fetch(`/api/meetings/${meeting.id}/chime-config?userId=${meeting.host_id}`);
       if (!response.ok) {
         throw new Error('Failed to get meeting configuration');
       }
