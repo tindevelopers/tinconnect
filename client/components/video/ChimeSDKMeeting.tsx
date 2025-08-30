@@ -70,10 +70,57 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
     initializeChimeMeeting();
   }, [meeting.id]);
 
+  const checkAvailableDevices = async () => {
+    try {
+      console.log('Checking available devices...');
+      
+      // Request permissions first
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      
+      // Stop the test stream
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Enumerate devices
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const audioDevices = devices.filter(device => device.kind === 'audioinput');
+      
+      console.log('Available video devices:', videoDevices.length);
+      console.log('Available audio devices:', audioDevices.length);
+      
+      if (videoDevices.length === 0) {
+        throw new Error('No camera devices found');
+      }
+      
+      if (audioDevices.length === 0) {
+        throw new Error('No microphone devices found');
+      }
+      
+      console.log('Device check passed');
+    } catch (error) {
+      console.error('Device check failed:', error);
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        throw new Error('Camera and microphone permissions are required');
+      } else if (error instanceof Error && error.message.includes('No camera devices found')) {
+        throw new Error('No camera devices found. Please connect a camera and try again.');
+      } else if (error instanceof Error && error.message.includes('No microphone devices found')) {
+        throw new Error('No microphone devices found. Please connect a microphone and try again.');
+      } else {
+        throw error;
+      }
+    }
+  };
+
   const initializeChimeMeeting = async () => {
     try {
       setIsConnecting(true);
       setConnectionError(null);
+
+      // Check for available devices first
+      await checkAvailableDevices();
 
       // Create logger
       loggerRef.current = new ConsoleLogger('ChimeSDKMeeting', LogLevel.INFO);
@@ -131,7 +178,11 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
 
     } catch (error) {
       console.error('Error initializing Chime meeting:', error);
-      setConnectionError('Failed to initialize meeting. Please try again.');
+      if (error instanceof Error) {
+        setConnectionError(error.message);
+      } else {
+        setConnectionError('Failed to initialize meeting. Please try again.');
+      }
       setIsConnecting(false);
     }
   };
@@ -155,8 +206,8 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
       }
     });
 
-    // Meeting session events
-    audioVideoRef.current.addMeetingSessionObserver({
+    // Meeting session events - using the correct observer pattern
+    const observer = {
       audioVideoDidStart: () => {
         console.log('Audio video started');
         setIsConnecting(false);
@@ -175,7 +226,14 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
         setConnectionError('Meeting connection failed. Please try again.');
         setIsConnecting(false);
       }
-    });
+    };
+
+    // Add the observer using the correct method
+    if (audioVideoRef.current && typeof audioVideoRef.current.addObserver === 'function') {
+      audioVideoRef.current.addObserver(observer);
+    } else {
+      console.warn('AudioVideo addObserver method not available');
+    }
 
     // Real-time events
     audioVideoRef.current.realtimeSubscribeToVolumeIndicator(
@@ -194,6 +252,17 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
     if (!audioVideoRef.current) return;
 
     try {
+      // Request camera and microphone permissions first
+      console.log('Requesting camera and microphone permissions...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      
+      // Stop the test stream
+      stream.getTracks().forEach(track => track.stop());
+      console.log('Camera and microphone permissions granted');
+
       // Start audio video
       await audioVideoRef.current.start();
 
@@ -208,7 +277,11 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
 
     } catch (error) {
       console.error('Error starting meeting:', error);
-      setConnectionError('Failed to start meeting. Please check your camera and microphone permissions.');
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        setConnectionError('Camera and microphone permissions are required. Please allow access and try again.');
+      } else {
+        setConnectionError('Failed to start meeting. Please check your camera and microphone permissions.');
+      }
       setIsConnecting(false);
     }
   };
