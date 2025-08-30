@@ -57,6 +57,7 @@ function AppRoutes() {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/join-meeting" element={<JoinMeeting />} />
         <Route path="/join-options" element={<JoinOptions />} />
+        <Route path="/meeting" element={<Meeting />} />
         <Route
           path="/dashboard"
           element={
