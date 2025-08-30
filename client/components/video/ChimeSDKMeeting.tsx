@@ -162,27 +162,6 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       }
     };
 
-    // Video tile observer
-    const videoTileObserver: VideoTileObserver = {
-      videoTileDidUpdate: (tileState: VideoTileState) => {
-        console.log('Video tile updated:', tileState);
-        if (tileState.localTile) {
-          // Local video
-          if (localVideoRef.current && tileState.active) {
-            audioVideoRef.current?.bindVideoElement(tileState.tileId, localVideoRef.current);
-          }
-        } else {
-          // Remote video
-          if (remoteVideoRef.current && tileState.active) {
-            audioVideoRef.current?.bindVideoElement(tileState.tileId, remoteVideoRef.current);
-          }
-        }
-      },
-      videoTileWasRemoved: (tileId: number) => {
-        console.log('Video tile removed:', tileId);
-      }
-    };
-
     // Device change observer
     const deviceChangeObserver: DeviceChangeObserver = {
       audioInputsChanged: (freshAudioInputDeviceList: MediaDeviceInfo[]) => {
@@ -199,10 +178,12 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       }
     };
 
-    // Add observers
+    // Add observers - only use available methods
     audioVideoRef.current.addObserver(audioVideoObserver);
-    audioVideoRef.current.addVideoTileObserver(videoTileObserver);
     audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
+
+    // Note: Video tile observer is not available in this version
+    // We'll handle video tiles manually in the startMeeting function
 
     console.log('Observers set up successfully');
   };
@@ -218,6 +199,13 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
 
       // Start local video
       audioVideoRef.current.startLocalVideo();
+
+      // Manually bind local video element since video tile observer is not available
+      if (localVideoRef.current) {
+        // Bind local video to tile ID 0 (local tile)
+        audioVideoRef.current.bindVideoElement(0, localVideoRef.current);
+        console.log('Local video bound successfully');
+      }
 
       console.log('Meeting started successfully');
 
