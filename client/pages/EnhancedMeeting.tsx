@@ -353,7 +353,7 @@ export default function EnhancedMeeting() {
 
       {/* Chat Panel */}
       {chatVisible && (
-        <div className="w-96 bg-gray-50 border-l border-gray-200 p-6">
+        <div className="fixed lg:relative inset-0 lg:inset-auto w-full lg:w-96 bg-gray-50 border-l border-gray-200 p-4 lg:p-6 z-50 lg:z-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
               <button 
