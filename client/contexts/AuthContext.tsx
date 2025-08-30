@@ -7,9 +7,7 @@ import {
   signUp as signUpHelper,
   signOut as signOutHelper,
   resetPassword as resetPasswordHelper,
-  getStoredSession,
-  clearStoredSession,
-} from "../lib/supabase";
+} from "../lib/supabase-simple";
 import { Tenant, User as UserProfile } from "../../server/lib/database.types";
 
 interface AuthContextType {
