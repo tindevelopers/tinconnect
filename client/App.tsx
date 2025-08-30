@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import ImprovedDashboard from "./pages/ImprovedDashboard";
 import EnhancedMeeting from "./pages/EnhancedMeeting";
 import StartMeetingPage from "./pages/StartMeetingPage";
+import MediaTest from "./pages/MediaTest";
 import NotFound from "./pages/NotFound";
 
 import "./global.css";
@@ -72,6 +73,7 @@ function AppRoutes() {
         <Route path="/meeting" element={<Meeting />} />
         <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
         <Route path="/start-meeting" element={<StartMeetingPage />} />
+        <Route path="/media-test" element={<MediaTest />} />
         <Route
           path="/dashboard"
 

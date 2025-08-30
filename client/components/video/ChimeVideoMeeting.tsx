@@ -38,6 +38,7 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
   const [participants, setParticipants] = useState([
     { id: '1', name: 'You', isLocal: true, isAudioMuted, isVideoEnabled, isScreenSharing: false },
   ]);
@@ -45,54 +46,116 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
   const [showChat, setShowChat] = useState(false);
   const [meetingLink, setMeetingLink] = useState('');
 
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // Media stream refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     // Generate meeting link for sharing
     const link = `${window.location.origin}/join-meeting?meetingId=${meeting.id}`;
     setMeetingLink(link);
     
-    // Simulate connection to Chime SDK
-    const connectToChime = async () => {
-      try {
-        setIsConnecting(true);
-        setConnectionError(null);
-        
-        // Here you would integrate with the actual Chime SDK
-        // For now, we'll simulate the connection
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Add some mock participants
-        setParticipants(prev => [
-          ...prev,
-          { id: '2', name: 'John Doe', isLocal: false, isAudioMuted: false, isVideoEnabled: true, isScreenSharing: false },
-          { id: '3', name: 'Jane Smith', isLocal: false, isAudioMuted: true, isVideoEnabled: false, isScreenSharing: false },
-        ]);
-        
-        setIsConnecting(false);
-      } catch (error) {
-        setConnectionError('Failed to connect to meeting');
-        setIsConnecting(false);
-      }
-    };
-
-    connectToChime();
+    // Initialize media devices
+    initializeMediaDevices();
   }, [meeting.id]);
 
+  const initializeMediaDevices = async () => {
+    try {
+      setIsConnecting(true);
+      setConnectionError(null);
+      setMediaError(null);
+
+      // Request camera and microphone permissions
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+
+      localStreamRef.current = stream;
+
+      // Display local video
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+
+      // Simulate connection to Chime SDK
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Add some mock participants
+      setParticipants(prev => [
+        { id: '1', name: 'You', isLocal: true, isAudioMuted: false, isVideoEnabled: true, isScreenSharing: false },
+        { id: '2', name: 'John Doe', isLocal: false, isAudioMuted: false, isVideoEnabled: true, isScreenSharing: false },
+        { id: '3', name: 'Jane Smith', isLocal: false, isAudioMuted: true, isVideoEnabled: false, isScreenSharing: false },
+      ]);
+      
+      setIsConnecting(false);
+    } catch (error) {
+      console.error('Error accessing media devices:', error);
+      setMediaError('Failed to access camera and microphone. Please check permissions.');
+      setIsConnecting(false);
+    }
+  };
+
   const toggleMute = () => {
-    setIsAudioMuted(!isAudioMuted);
-    // Here you would call Chime SDK to mute/unmute audio
+    if (localStreamRef.current) {
+      const audioTracks = localStreamRef.current.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setIsAudioMuted(!isAudioMuted);
+    }
   };
 
   const toggleVideo = () => {
-    setIsVideoEnabled(!isVideoEnabled);
-    // Here you would call Chime SDK to enable/disable video
+    if (localStreamRef.current) {
+      const videoTracks = localStreamRef.current.getVideoTracks();
+      videoTracks.forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setIsVideoEnabled(!isVideoEnabled);
+    }
   };
 
-  const toggleScreenShare = () => {
-    setIsScreenSharing(!isScreenSharing);
-    // Here you would call Chime SDK to start/stop screen sharing
+  const toggleScreenShare = async () => {
+    try {
+      if (!isScreenSharing) {
+        // Start screen sharing
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false
+        });
+        
+        screenStreamRef.current = screenStream;
+        
+        // Replace video track with screen share
+        if (localStreamRef.current && localVideoRef.current) {
+          const videoTrack = screenStream.getVideoTracks()[0];
+          const audioTrack = localStreamRef.current.getAudioTracks()[0];
+          
+          const newStream = new MediaStream([videoTrack, audioTrack]);
+          localVideoRef.current.srcObject = newStream;
+        }
+        
+        setIsScreenSharing(true);
+      } else {
+        // Stop screen sharing
+        if (screenStreamRef.current) {
+          screenStreamRef.current.getTracks().forEach(track => track.stop());
+          screenStreamRef.current = null;
+        }
+        
+        // Restore camera video
+        if (localStreamRef.current && localVideoRef.current) {
+          localVideoRef.current.srcObject = localStreamRef.current;
+        }
+        
+        setIsScreenSharing(false);
+      }
+    } catch (error) {
+      console.error('Error toggling screen share:', error);
+      setMediaError('Failed to start screen sharing.');
+    }
   };
 
   const copyMeetingLink = async () => {
@@ -107,6 +170,17 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
   const inviteParticipants = () => {
     // Open invite dialog or copy link
     copyMeetingLink();
+  };
+
+  const handleLeave = () => {
+    // Stop all media streams
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+    }
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => track.stop());
+    }
+    onLeave();
   };
 
   if (isConnecting) {
@@ -128,10 +202,32 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
           <Alert className="border-red-200 bg-red-50 mb-4">
             <AlertDescription className="text-red-800">{connectionError}</AlertDescription>
           </Alert>
-          <Button onClick={onLeave} variant="outline">
+          <Button onClick={handleLeave} variant="outline">
             <PhoneOff className="w-4 h-4 mr-2" />
             Leave Meeting
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (mediaError) {
+    return (
+      <div className="h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <Alert className="border-red-200 bg-red-50 mb-4">
+            <AlertDescription className="text-red-800">{mediaError}</AlertDescription>
+          </Alert>
+          <div className="space-y-2">
+            <Button onClick={initializeMediaDevices} variant="outline">
+              <Video className="w-4 h-4 mr-2" />
+              Retry Camera Access
+            </Button>
+            <Button onClick={handleLeave} variant="outline">
+              <PhoneOff className="w-4 h-4 mr-2" />
+              Leave Meeting
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -162,7 +258,7 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
             <UserPlus className="w-4 h-4 mr-2" />
             Invite
           </Button>
-          <Button variant="outline" size="sm" onClick={onLeave}>
+          <Button variant="outline" size="sm" onClick={handleLeave}>
             <PhoneOff className="w-4 h-4 mr-2" />
             Leave
           </Button>
@@ -174,7 +270,46 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
         {/* Video Grid */}
         <div className="flex-1 p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 h-full">
-            {participants.map((participant) => (
+            {/* Local Video */}
+            <Card className="bg-gray-800 border-gray-700">
+              <CardContent className="p-4 h-48 flex flex-col items-center justify-center relative">
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                
+                {/* Participant Name */}
+                <p className="text-white text-sm font-medium text-center mt-2">
+                  You
+                </p>
+                
+                {/* Status Indicators */}
+                <div className="flex items-center space-x-1 mt-2">
+                  {isAudioMuted && (
+                    <MicOff className="w-4 h-4 text-red-400" />
+                  )}
+                  {!isVideoEnabled && (
+                    <VideoOff className="w-4 h-4 text-red-400" />
+                  )}
+                  {isScreenSharing && (
+                    <Monitor className="w-4 h-4 text-blue-400" />
+                  )}
+                </div>
+                
+                {/* Local User Indicator */}
+                <div className="absolute top-2 left-2">
+                  <Badge variant="outline" className="text-xs bg-blue-600 text-white">
+                    You
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Remote Participants */}
+            {participants.filter(p => !p.isLocal).map((participant) => (
               <Card key={participant.id} className="bg-gray-800 border-gray-700">
                 <CardContent className="p-4 h-48 flex flex-col items-center justify-center relative">
                   {/* Video Placeholder */}
@@ -185,7 +320,6 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
                   {/* Participant Name */}
                   <p className="text-white text-sm font-medium text-center">
                     {participant.name}
-                    {participant.isLocal && ' (You)'}
                   </p>
                   
                   {/* Status Indicators */}
@@ -200,15 +334,6 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
                       <Monitor className="w-4 h-4 text-blue-400" />
                     )}
                   </div>
-                  
-                  {/* Local User Indicator */}
-                  {participant.isLocal && (
-                    <div className="absolute top-2 left-2">
-                      <Badge variant="outline" className="text-xs bg-blue-600 text-white">
-                        You
-                      </Badge>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             ))}
@@ -337,7 +462,7 @@ export const ChimeVideoMeeting: React.FC<ChimeVideoMeetingProps> = ({
         <Button
           variant="destructive"
           size="lg"
-          onClick={onLeave}
+          onClick={handleLeave}
           className="rounded-full w-12 h-12 p-0"
         >
           <PhoneOff className="w-5 h-5" />
