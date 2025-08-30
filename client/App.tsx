@@ -16,6 +16,7 @@ import Meeting from "./pages/Meeting";
 import Dashboard from "./pages/Dashboard";
 import ImprovedDashboard from "./pages/ImprovedDashboard";
 import EnhancedMeeting from "./pages/EnhancedMeeting";
+import StartMeetingPage from "./pages/StartMeetingPage";
 import NotFound from "./pages/NotFound";
 
 import "./global.css";
@@ -70,6 +71,7 @@ function AppRoutes() {
         <Route path="/join-options" element={<JoinOptions />} />
         <Route path="/meeting" element={<Meeting />} />
         <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
+        <Route path="/start-meeting" element={<StartMeetingPage />} />
         <Route
           path="/dashboard"
 
