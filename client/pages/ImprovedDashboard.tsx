@@ -80,9 +80,9 @@ export default function ImprovedDashboard() {
   const handleJoinUpcomingMeeting = () => {
     const meetingInfo = {
       meetingId: '214578',
-      userName: userProfile?.name || user?.email || 'User'
+      userName: userProfile?.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'
     };
-    
+
     sessionStorage.setItem('pendingMeeting', JSON.stringify(meetingInfo));
     navigate('/enhanced-meeting', { state: meetingInfo });
   };
