@@ -47,12 +47,12 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onSwitchToSig
         name,
         tenant_id: '00000000-0000-0000-0000-000000000000' // Placeholder
       });
-      
+
       if (error) {
         setError(error.message);
       } else {
-        setSuccess(true);
-        setSuccess(true);
+        // Since we've disabled email confirmation, redirect to success immediately
+        onSuccess?.();
       }
     } catch (err) {
       setError('An unexpected error occurred');
