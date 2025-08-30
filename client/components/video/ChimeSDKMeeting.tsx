@@ -161,12 +161,26 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       }
     };
 
-    // Add observers - only use available methods
-    audioVideoRef.current.addObserver(audioVideoObserver);
-    audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
+    // Video tile observer to handle video tile updates
+    const videoTileObserver: VideoTileObserver = {
+      videoTileDidUpdate: (tileState: VideoTileState) => {
+        console.log('Video tile updated:', tileState);
+        if (tileState.localTile && tileState.active) {
+          console.log('Local video tile is active, binding video element');
+          if (localVideoRef.current) {
+            audioVideoRef.current?.bindVideoElement(tileState.tileId, localVideoRef.current);
+          }
+        }
+      },
+      videoTileWasRemoved: (tileId: number) => {
+        console.log('Video tile removed:', tileId);
+      }
+    };
 
-    // Note: Video tile observer is not available in this version
-    // We'll handle video tiles manually in the startMeeting function
+    // Add observers
+    audioVideoRef.current.addObserver(audioVideoObserver);
+    audioVideoRef.current.addVideoTileObserver(videoTileObserver);
+    audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
 
     console.log('Observers set up successfully');
   };
@@ -279,6 +293,10 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       setIsVideoEnabled(false);
     } else {
       audioVideoRef.current.startLocalVideoTile();
+      // Bind the local video element to tile ID 0 (local video)
+      if (localVideoRef.current) {
+        audioVideoRef.current.bindVideoElement(0, localVideoRef.current);
+      }
       setIsVideoEnabled(true);
     }
   };
