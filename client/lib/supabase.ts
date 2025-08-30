@@ -1,17 +1,35 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '../../server/lib/database.types';
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "../../server/lib/database.types";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Environment-aware configuration
+const isProduction = import.meta.env.PROD;
+const isPreview = import.meta.env.VITE_VERCEL_ENV === "preview";
+
+// Select environment variables based on deployment environment
+const supabaseUrl = isProduction
+  ? import.meta.env.VITE_SUPABASE_URL
+  : import.meta.env.VITE_SUPABASE_URL_PREVIEW ||
+    import.meta.env.VITE_SUPABASE_URL;
+
+const supabaseAnonKey = isProduction
+  ? import.meta.env.VITE_SUPABASE_ANON_KEY
+  : import.meta.env.VITE_SUPABASE_ANON_KEY_PREVIEW ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Debug logging
-console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Not set');
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Set' : 'Not set');
+console.log(
+  "Environment:",
+  isProduction ? "Production" : isPreview ? "Preview" : "Development",
+);
+console.log("Supabase URL:", supabaseUrl ? "Set" : "Not set");
+console.log("Supabase Anon Key:", supabaseAnonKey ? "Set" : "Not set");
 
 // Only check for environment variables at runtime, not during build
 const checkEnvVars = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set');
+    console.error(
+      "Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set",
+    );
     return false;
   }
   return true;
@@ -19,49 +37,56 @@ const checkEnvVars = () => {
 
 // Create Supabase client for frontend
 export const supabase = createClient<Database>(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key',
+  supabaseUrl || "https://placeholder.supabase.co",
+  supabaseAnonKey || "placeholder-key",
   {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
-    }
-  }
+      detectSessionInUrl: true,
+      flowType: "pkce",
+    },
+  },
 );
 
 // Auth helper functions
-export const signUp = async (email: string, password: string, userData: {
-  name: string;
-  tenant_id: string;
-}) => {
+export const signUp = async (
+  email: string,
+  password: string,
+  userData: {
+    name: string;
+    tenant_id: string;
+  },
+) => {
   if (!checkEnvVars()) {
-    return { data: null, error: { message: 'Supabase not configured' } };
+    return { data: null, error: { message: "Supabase not configured" } };
   }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: userData
-    }
+      data: userData,
+    },
   });
+
   return { data, error };
 };
 
 export const signIn = async (email: string, password: string) => {
   if (!checkEnvVars()) {
-    return { data: null, error: { message: 'Supabase not configured' } };
+    return { data: null, error: { message: "Supabase not configured" } };
   }
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   });
   return { data, error };
 };
 
 export const signOut = async () => {
   if (!checkEnvVars()) {
-    return { error: { message: 'Supabase not configured' } };
+    return { error: { message: "Supabase not configured" } };
   }
   const { error } = await supabase.auth.signOut();
   return { error };
@@ -69,7 +94,7 @@ export const signOut = async () => {
 
 export const resetPassword = async (email: string) => {
   if (!checkEnvVars()) {
-    return { data: null, error: { message: 'Supabase not configured' } };
+    return { data: null, error: { message: "Supabase not configured" } };
   }
   const { data, error } = await supabase.auth.resetPasswordForEmail(email);
   return { data, error };
@@ -77,10 +102,10 @@ export const resetPassword = async (email: string) => {
 
 export const updatePassword = async (password: string) => {
   if (!checkEnvVars()) {
-    return { data: null, error: { message: 'Supabase not configured' } };
+    return { data: null, error: { message: "Supabase not configured" } };
   }
   const { data, error } = await supabase.auth.updateUser({
-    password
+    password,
   });
   return { data, error };
 };
@@ -88,11 +113,12 @@ export const updatePassword = async (password: string) => {
 // User context helper
 export const getUserContext = async (userId: string) => {
   if (!checkEnvVars()) {
-    return { data: null, error: { message: 'Supabase not configured' } };
+    return { data: null, error: { message: "Supabase not configured" } };
   }
   const { data, error } = await supabase
-    .from('users')
-    .select(`
+    .from("users")
+    .select(
+      `
       *,
       tenants (
         id,
@@ -100,70 +126,80 @@ export const getUserContext = async (userId: string) => {
         domain,
         settings
       )
-    `)
-    .eq('id', userId)
+    `,
+    )
+    .eq("id", userId)
     .single();
 
   return { data, error };
 };
 
 // Real-time subscriptions
-export const subscribeToMeetingUpdates = (meetingId: string, callback: (payload: any) => void) => {
+export const subscribeToMeetingUpdates = (
+  meetingId: string,
+  callback: (payload: any) => void,
+) => {
   if (!checkEnvVars()) {
-    console.error('Supabase not configured for real-time subscriptions');
+    console.error("Supabase not configured for real-time subscriptions");
     return { unsubscribe: () => {} };
   }
   return supabase
     .channel(`meeting:${meetingId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: '*',
-        schema: 'public',
-        table: 'meeting_participants',
-        filter: `meeting_id=eq.${meetingId}`
+        event: "*",
+        schema: "public",
+        table: "meeting_participants",
+        filter: `meeting_id=eq.${meetingId}`,
       },
-      callback
+      callback,
     )
     .subscribe();
 };
 
-export const subscribeToParticipantUpdates = (meetingId: string, callback: (payload: any) => void) => {
+export const subscribeToParticipantUpdates = (
+  meetingId: string,
+  callback: (payload: any) => void,
+) => {
   if (!checkEnvVars()) {
-    console.error('Supabase not configured for real-time subscriptions');
+    console.error("Supabase not configured for real-time subscriptions");
     return { unsubscribe: () => {} };
   }
   return supabase
     .channel(`participants:${meetingId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: '*',
-        schema: 'public',
-        table: 'meeting_participants',
-        filter: `meeting_id=eq.${meetingId}`
+        event: "*",
+        schema: "public",
+        table: "meeting_participants",
+        filter: `meeting_id=eq.${meetingId}`,
       },
-      callback
+      callback,
     )
     .subscribe();
 };
 
-export const subscribeToChatMessages = (meetingId: string, callback: (payload: any) => void) => {
+export const subscribeToChatMessages = (
+  meetingId: string,
+  callback: (payload: any) => void,
+) => {
   if (!checkEnvVars()) {
-    console.error('Supabase not configured for real-time subscriptions');
+    console.error("Supabase not configured for real-time subscriptions");
     return { unsubscribe: () => {} };
   }
   return supabase
     .channel(`chat:${meetingId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'chat_messages',
-        filter: `meeting_id=eq.${meetingId}`
+        event: "INSERT",
+        schema: "public",
+        table: "chat_messages",
+        filter: `meeting_id=eq.${meetingId}`,
       },
-      callback
+      callback,
     )
     .subscribe();
 };
