@@ -29,13 +29,9 @@ interface ChimeSDKMeetingProps {
   meeting: {
     id: string;
     title: string;
-    description?: string;
-    chime_meeting_id?: string;
+    description: string;
     host_id: string;
-    tenant_id: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
+    chime_meeting_id: string;
   };
   onLeave: () => void;
 }
@@ -53,9 +49,7 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const loggerRef = useRef<ConsoleLogger | null>(null);
-  const deviceControllerRef = useRef<DefaultDeviceController | null>(null);
 
-  // Check for available devices first
   const checkAvailableDevices = async () => {
     try {
       console.log('Checking available devices...');
@@ -95,50 +89,41 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
     }
   };
 
-  const initializeMeetingSession = async () => {
+  const initializeMeetingSession = async (meetingConfig: any) => {
     try {
-      console.log('Initializing meeting session...');
+      console.log('Initializing meeting session with config:', meetingConfig);
 
-      // Get the meeting configuration from the server
-      const response = await fetch(`/api/meetings/${meeting.id}/chime-config?userId=${meeting.host_id}`);
-      if (!response.ok) {
-        throw new Error('Failed to get meeting configuration');
-      }
-      
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to get meeting configuration');
-      }
-
-      const config = result.data;
-      console.log('Meeting configuration:', config);
-
-      // Create meeting session configuration
-      const meetingSessionConfiguration = new MeetingSessionConfiguration(
-        config.meeting,
-        config.attendee
-      );
+      // Create logger
+      loggerRef.current = new ConsoleLogger('ChimeSDKMeeting', LogLevel.INFO);
 
       // Create device controller
-      deviceControllerRef.current = new DefaultDeviceController(loggerRef.current!, {
+      const deviceController = new DefaultDeviceController(loggerRef.current, {
         enableWebAudio: true,
         enableUnifiedPlanForChromiumBasedBrowsers: true,
       });
 
-      // Create meeting session
-      const meetingSession = new DefaultMeetingSession(
-        meetingSessionConfiguration,
-        loggerRef.current!,
-        deviceControllerRef.current
+      // Create meeting session configuration
+      const configuration = new MeetingSessionConfiguration(
+        meetingConfig.meeting,
+        meetingConfig.attendee,
+        deviceController
       );
 
+      // Create meeting session
+      const meetingSession = new DefaultMeetingSession(
+        configuration,
+        loggerRef.current,
+        deviceController
+      );
+
+      // Store the audio video facade
       audioVideoRef.current = meetingSession.audioVideo;
 
       // Set up observers
       setupObservers();
 
-      console.log('Meeting session initialized successfully');
-      return meetingSession;
+      // Start the meeting
+      await startMeeting();
 
     } catch (error) {
       console.error('Error initializing meeting session:', error);
@@ -209,8 +194,8 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       audioOutputsChanged: (freshAudioOutputDeviceList: MediaDeviceInfo[]) => {
         console.log('Audio outputs changed:', freshAudioOutputDeviceList);
       },
-      videoInputsChanged: (freshVideoInputDeviceList: MediaDeviceInfo[]) => {
-        console.log('Video inputs changed:', freshVideoInputDeviceList);
+      videoInputQualityChanged: (bitrateKbps: number, packetsPerSecond: number) => {
+        console.log('Video input quality changed:', { bitrateKbps, packetsPerSecond });
       }
     };
 
@@ -251,14 +236,24 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Check for available devices first
       await checkAvailableDevices();
 
-      // Create logger
-      loggerRef.current = new ConsoleLogger('ChimeSDKMeeting', LogLevel.INFO);
+      // Get the meeting configuration from the server
+      const response = await fetch(`/api/meetings/${meeting.id}/chime-config?userId=${meeting.host_id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to get meeting configuration: ${response.statusText}`);
+      }
 
-      // Initialize meeting session
-      await initializeMeetingSession();
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to get meeting configuration');
+      }
 
-      // Start the meeting
-      await startMeeting();
+      const meetingConfig = result.data;
+      console.log('Meeting config received:', meetingConfig);
+
+      // Initialize the meeting session
+      await initializeMeetingSession(meetingConfig);
 
     } catch (error) {
       console.error('Error initializing Chime meeting:', error);
@@ -300,13 +295,13 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
 
     try {
       if (isScreenSharing) {
-        audioVideoRef.current.stopContentShare();
+        await audioVideoRef.current.stopContentShare();
         setIsScreenSharing(false);
       } else {
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: true
         });
-        audioVideoRef.current.startContentShare(stream);
+        await audioVideoRef.current.startContentShare(stream);
         setIsScreenSharing(true);
       }
     } catch (error) {
@@ -329,102 +324,112 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
         audioVideoRef.current.stop();
       }
     };
-  }, []);
+  }, [meeting.id]);
+
+  if (connectionError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
+        <div className="bg-red-900 border border-red-700 rounded-lg p-6 max-w-md w-full">
+          <h2 className="text-xl font-bold mb-4">Connection Error</h2>
+          <p className="text-red-200 mb-4">{connectionError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 bg-gray-800">
-        <h1 className="text-xl font-semibold">{meeting.title}</h1>
+      <div className="flex justify-between items-center p-4 bg-gray-800 border-b border-gray-700">
+        <h1 className="text-xl font-bold">{meeting.title}</h1>
         <button
           onClick={leaveMeeting}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
         >
           Leave Meeting
         </button>
       </div>
 
-      {/* Video Container */}
-      <div className="flex-1 p-4">
-        <div className="grid grid-cols-2 gap-4 h-full">
-          {/* Local Video */}
-          <div className="relative bg-gray-800 rounded-lg overflow-hidden">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-              You (Local)
-            </div>
-          </div>
-
-          {/* Remote Video */}
-          <div className="relative bg-gray-800 rounded-lg overflow-hidden">
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-              Remote Participant
-            </div>
+      {/* Loading State */}
+      {isConnecting && (
+        <div className="flex items-center justify-center flex-1">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p>Connecting to meeting...</p>
           </div>
         </div>
+      )}
 
-        {/* Error Message */}
-        {connectionError && (
-          <div className="mt-4 p-4 bg-red-600 rounded-lg">
-            {connectionError}
-          </div>
-        )}
-
-        {/* Controls */}
-        <div className="flex justify-center space-x-4 mt-4">
-          <button
-            onClick={toggleMute}
-            className={`px-6 py-3 rounded-lg transition-colors ${
-              isMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'
-            }`}
-          >
-            {isMuted ? 'Unmute' : 'Mute'}
-          </button>
-
-          <button
-            onClick={toggleVideo}
-            className={`px-6 py-3 rounded-lg transition-colors ${
-              !isVideoEnabled ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'
-            }`}
-          >
-            {isVideoEnabled ? 'Stop Video' : 'Start Video'}
-          </button>
-
-          <button
-            onClick={toggleScreenShare}
-            className={`px-6 py-3 rounded-lg transition-colors ${
-              isScreenSharing ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'
-            }`}
-          >
-            {isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
-          </button>
-        </div>
-
-        {/* Participants */}
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold mb-2">Participants</h3>
-          <div className="space-y-2">
-            {participants.map((participant, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>{participant.name}</span>
+      {/* Meeting Interface */}
+      {!isConnecting && (
+        <div className="flex-1 flex">
+          {/* Video Area */}
+          <div className="flex-1 flex flex-wrap gap-4 p-4">
+            {/* Local Video */}
+            <div className="relative bg-gray-800 rounded-lg overflow-hidden flex-1 min-h-64">
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                You (Local)
               </div>
-            ))}
+            </div>
+
+            {/* Remote Video */}
+            <div className="relative bg-gray-800 rounded-lg overflow-hidden flex-1 min-h-64">
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                Remote Participant
+              </div>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="w-16 bg-gray-800 border-l border-gray-700 flex flex-col items-center justify-center gap-4">
+            <button
+              onClick={toggleMute}
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                isMuted ? 'bg-red-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+            >
+              {isMuted ? '🔇' : '🎤'}
+            </button>
+
+            <button
+              onClick={toggleVideo}
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                !isVideoEnabled ? 'bg-red-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+            >
+              {!isVideoEnabled ? '📹' : '📷'}
+            </button>
+
+            <button
+              onClick={toggleScreenShare}
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                isScreenSharing ? 'bg-blue-600' : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+            >
+              🖥️
+            </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
