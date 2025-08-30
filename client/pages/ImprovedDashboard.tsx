@@ -210,7 +210,7 @@ export default function ImprovedDashboard() {
       </div>
 
       {/* Chat Panel */}
-      <div className="w-96 bg-gray-50 border-l border-gray-200 p-6">
+      <div className="hidden xl:block w-96 bg-gray-50 border-l border-gray-200 p-4 lg:p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
             <button className="p-3 bg-white rounded-2xl shadow-sm">
