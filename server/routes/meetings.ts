@@ -9,8 +9,8 @@ const meetingService = new MeetingService();
 const createMeetingSchema = z.object({
   title: z.string().min(1, "Meeting title is required"),
   description: z.string().optional(),
-  hostId: z.string().min(1, "Host ID is required"),
-  scheduledAt: z.string().datetime().optional(),
+  host_id: z.string().min(1, "Host ID is required"),
+  scheduled_at: z.string().datetime().optional(),
   settings: z.object({
     recordingEnabled: z.boolean().optional(),
     chatEnabled: z.boolean().optional(),
@@ -28,11 +28,14 @@ const joinMeetingSchema = z.object({
 export const createMeeting: RequestHandler = async (req, res) => {
   try {
     const { tenantId } = req.params;
+    console.log('Create meeting request:', { tenantId, body: req.body });
+    
     const validatedData = createMeetingSchema.parse(req.body);
+    console.log('Validated data:', validatedData);
     
     const meeting = await meetingService.createMeeting({
       ...validatedData,
-      tenantId,
+      tenant_id: tenantId,
     });
     
     const response: ApiResponse<Meeting> = {
@@ -85,6 +88,30 @@ export const getMeeting: RequestHandler = async (req, res) => {
     const response: ApiResponse<null> = {
       success: false,
       error: error instanceof Error ? error.message : "Failed to get meeting",
+    };
+    res.status(500).json(response);
+  }
+};
+
+export const getChimeMeetingConfig: RequestHandler = async (req, res) => {
+  try {
+    const { meetingId } = req.params;
+    const { userId } = req.query; // Get userId from query parameters
+    
+    const config = await meetingService.getChimeMeetingConfig(meetingId, userId as string);
+    
+    const response: ApiResponse<any> = {
+      success: true,
+      data: config,
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error("Error getting Chime meeting config:", error);
+    
+    const response: ApiResponse<null> = {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to get meeting configuration",
     };
     res.status(500).json(response);
   }

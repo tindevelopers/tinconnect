@@ -19,7 +19,14 @@ export default function Auth() {
   }, [searchParams]);
 
   const handleSuccess = () => {
-    navigate("/improved-dashboard");
+    // Check if there's a redirect parameter in the URL
+    const redirectTo = searchParams.get("redirect");
+    if (redirectTo) {
+      navigate(redirectTo);
+    } else {
+      // Default to dashboard
+      navigate("/dashboard");
+    }
   };
 
   const switchToSignUp = () => setMode("signup");

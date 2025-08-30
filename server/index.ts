@@ -26,6 +26,7 @@ import {
   joinMeeting,
   leaveMeeting,
   endMeeting,
+  getChimeMeetingConfig,
 } from "./routes/meetings.js";
 
 // Import Chime test routes
@@ -34,6 +35,7 @@ import {
   createTestMeeting,
 } from "./routes/chime-test.js";
 
+config({ path: '.env.local' });
 config();
 
 export function createServer() {
@@ -62,6 +64,7 @@ export function createServer() {
   app.post("/api/tenants/:tenantId/meetings", createMeeting);
   app.get("/api/tenants/:tenantId/meetings", getMeetings);
   app.get("/api/tenants/:tenantId/meetings/:meetingId", getMeeting);
+  app.get("/api/meetings/:meetingId/chime-config", getChimeMeetingConfig);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/join", joinMeeting);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/leave", leaveMeeting);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/end", endMeeting);
