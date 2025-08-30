@@ -4,6 +4,7 @@ import { Database } from "../../server/lib/database.types";
 // Environment-aware configuration
 const isProduction = import.meta.env.PROD;
 const isPreview = import.meta.env.VITE_VERCEL_ENV === "preview";
+const isDevelopment = import.meta.env.DEV;
 
 // Select environment variables based on deployment environment
 const supabaseUrl = isProduction
@@ -17,12 +18,18 @@ const supabaseAnonKey = isProduction
     import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Debug logging
-console.log(
-  "Environment:",
-  isProduction ? "Production" : isPreview ? "Preview" : "Development",
-);
+console.log("=== Supabase Configuration Debug ===");
+console.log("Environment:", isProduction ? "Production" : isPreview ? "Preview" : isDevelopment ? "Development" : "Unknown");
+console.log("VITE_VERCEL_ENV:", import.meta.env.VITE_VERCEL_ENV);
+console.log("PROD:", import.meta.env.PROD);
+console.log("DEV:", import.meta.env.DEV);
 console.log("Supabase URL:", supabaseUrl ? "Set" : "Not set");
 console.log("Supabase Anon Key:", supabaseAnonKey ? "Set" : "Not set");
+console.log("URL Preview:", import.meta.env.VITE_SUPABASE_URL_PREVIEW ? "Set" : "Not set");
+console.log("Key Preview:", import.meta.env.VITE_SUPABASE_ANON_KEY_PREVIEW ? "Set" : "Not set");
+console.log("URL Production:", import.meta.env.VITE_SUPABASE_URL ? "Set" : "Not set");
+console.log("Key Production:", import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not set");
+console.log("=====================================");
 
 // Only check for environment variables at runtime, not during build
 const checkEnvVars = () => {
@@ -30,6 +37,7 @@ const checkEnvVars = () => {
     console.error(
       "Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set",
     );
+    console.error("Current values:", { supabaseUrl, supabaseAnonKey });
     return false;
   }
   return true;
@@ -62,42 +70,65 @@ export const signUp = async (
     return { data: null, error: { message: "Supabase not configured" } };
   }
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: userData,
-    },
-  });
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: userData,
+      },
+    });
 
-  return { data, error };
+    return { data, error };
+  } catch (error) {
+    console.error("SignUp error:", error);
+    return { data: null, error: { message: "Failed to sign up" } };
+  }
 };
 
 export const signIn = async (email: string, password: string) => {
   if (!checkEnvVars()) {
     return { data: null, error: { message: "Supabase not configured" } };
   }
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { data, error };
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { data, error };
+  } catch (error) {
+    console.error("SignIn error:", error);
+    return { data: null, error: { message: "Failed to sign in" } };
+  }
 };
 
 export const signOut = async () => {
   if (!checkEnvVars()) {
     return { error: { message: "Supabase not configured" } };
   }
-  const { error } = await supabase.auth.signOut();
-  return { error };
+
+  try {
+    const { error } = await supabase.auth.signOut();
+    return { error };
+  } catch (error) {
+    console.error("SignOut error:", error);
+    return { error: { message: "Failed to sign out" } };
+  }
 };
 
 export const resetPassword = async (email: string) => {
   if (!checkEnvVars()) {
     return { data: null, error: { message: "Supabase not configured" } };
   }
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email);
-  return { data, error };
+
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+    return { data, error };
+  } catch (error) {
+    console.error("ResetPassword error:", error);
+    return { data: null, error: { message: "Failed to reset password" } };
+  }
 };
 
 export const updatePassword = async (password: string) => {
