@@ -30,6 +30,14 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [showCameraPreview, setShowCameraPreview] = useState(true);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('');
+  const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('');
+  const [availableDevices, setAvailableDevices] = useState<{
+    videoDevices: MediaDeviceInfo[];
+    audioDevices: MediaDeviceInfo[];
+  }>({ videoDevices: [], audioDevices: [] });
   const [participants, setParticipants] = useState<any[]>([]);
 
   const audioVideoRef = useRef<any | null>(null); // Changed type to any as AudioVideoFacade is not imported
@@ -55,20 +63,19 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       console.log('Available video devices:', videoDevices);
       console.log('Available audio devices:', audioDevices);
       
-      // Stop the test stream
-      stream.getTracks().forEach(track => track.stop());
+      // Set available devices
+      setAvailableDevices({ videoDevices, audioDevices });
       
-      // If we have a device controller, set the default devices
-      if (audioVideoRef.current) {
-        if (videoDevices.length > 0) {
-          console.log('Setting default video device:', videoDevices[0].deviceId);
-          await audioVideoRef.current.chooseVideoInputDevice(videoDevices[0].deviceId);
-        }
-        if (audioDevices.length > 0) {
-          console.log('Setting default audio device:', audioDevices[0].deviceId);
-          await audioVideoRef.current.chooseAudioInputDevice(audioDevices[0].deviceId);
-        }
+      // Set default selections
+      if (videoDevices.length > 0 && !selectedVideoDevice) {
+        setSelectedVideoDevice(videoDevices[0].deviceId);
       }
+      if (audioDevices.length > 0 && !selectedAudioDevice) {
+        setSelectedAudioDevice(audioDevices[0].deviceId);
+      }
+      
+      // Store the stream for preview
+      setCameraStream(stream);
       
       console.log('Camera and microphone permissions granted');
       return true;
@@ -77,6 +84,28 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       setConnectionError('Camera and microphone access is required. Please allow permissions and try again.');
       return false;
     }
+  };
+
+  const startCameraPreview = async () => {
+    try {
+      await checkAvailableDevices();
+    } catch (error) {
+      console.error('Error starting camera preview:', error);
+    }
+  };
+
+  const startMeetingWithPreview = async () => {
+    setShowCameraPreview(false);
+    setIsConnecting(true);
+    
+    // Stop the preview stream
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    
+    // Initialize the meeting
+    await initializeChimeMeeting();
   };
 
   const initializeMeetingSession = async (meetingConfig: any) => {
@@ -123,10 +152,6 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Set up observers
       console.log('Setting up observers...');
       setupObservers();
-
-      // Set up devices after meeting session is created
-      console.log('Setting up devices...');
-      await checkAvailableDevices();
 
       // Start the meeting
       console.log('Starting the meeting...');
@@ -374,14 +399,19 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
   };
 
   useEffect(() => {
-    initializeChimeMeeting();
+    // Start camera preview when component mounts
+    startCameraPreview();
 
     return () => {
       if (audioVideoRef.current) {
         audioVideoRef.current.stop();
       }
+      // Stop camera stream on cleanup
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, [meeting.id]);
+  }, []);
 
   if (connectionError) {
     return (
@@ -414,6 +444,114 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
           >
             Try Again
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Camera Preview Screen
+  if (showCameraPreview) {
+    return (
+      <div className="flex flex-col h-screen bg-gray-900 text-white">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 bg-gray-800 border-b border-gray-700">
+          <h1 className="text-xl font-bold">Camera Setup - {meeting.title}</h1>
+          <button
+            onClick={leaveMeeting}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          >
+            Cancel
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="max-w-2xl w-full">
+            <h2 className="text-2xl font-bold mb-6 text-center">Camera & Microphone Setup</h2>
+            
+            {/* Camera Preview */}
+            <div className="bg-gray-800 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-4">Camera Preview</h3>
+              <div className="relative bg-black rounded-lg overflow-hidden aspect-video mb-4">
+                {cameraStream ? (
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">📹</div>
+                      <p>Camera not started</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <button
+                onClick={startCameraPreview}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              >
+                {cameraStream ? 'Restart Camera' : 'Start Camera'}
+              </button>
+            </div>
+
+            {/* Device Selection */}
+            {availableDevices.videoDevices.length > 0 && (
+              <div className="bg-gray-800 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4">Device Selection</h3>
+                
+                {/* Video Device */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Camera</label>
+                  <select
+                    value={selectedVideoDevice}
+                    onChange={(e) => setSelectedVideoDevice(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+                  >
+                    {availableDevices.videoDevices.map((device) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Camera ${device.deviceId.slice(0, 8)}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Audio Device */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Microphone</label>
+                  <select
+                    value={selectedAudioDevice}
+                    onChange={(e) => setSelectedAudioDevice(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+                  >
+                    {availableDevices.audioDevices.map((device) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Start Meeting Button */}
+            <div className="text-center">
+              <button
+                onClick={startMeetingWithPreview}
+                disabled={!cameraStream}
+                className={`px-8 py-3 rounded-lg font-semibold ${
+                  cameraStream
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {cameraStream ? '✅ Start Meeting' : 'Start Camera First'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
