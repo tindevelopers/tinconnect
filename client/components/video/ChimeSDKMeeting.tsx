@@ -122,6 +122,9 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       setCameraStream(null);
     }
     
+    // Wait a moment for the UI to update
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // Initialize the meeting
     await initializeChimeMeeting();
   };
@@ -275,21 +278,26 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Manually bind video element since video tile observer is not available
       // Add a retry mechanism since the video element might not be rendered yet
       let retryCount = 0;
-      const maxRetries = 10;
+      const maxRetries = 20; // Increased retries
       const bindVideoElement = () => {
         if (localVideoRef.current) {
           console.log('localVideoRef.current is available, binding video element...');
           // Get the local video tile ID (usually 1 for local video)
           const localTileId = 1;
-          audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
-          console.log('Video element bound manually to tile ID:', localTileId);
-          return true;
+          try {
+            audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
+            console.log('Video element bound manually to tile ID:', localTileId);
+            return true;
+          } catch (error) {
+            console.error('Error binding video element:', error);
+            return false;
+          }
         } else {
           console.log(`localVideoRef.current is null - retry ${retryCount + 1}/${maxRetries}`);
           retryCount++;
           if (retryCount < maxRetries) {
-            // Retry after a short delay
-            setTimeout(bindVideoElement, 100);
+            // Retry after a longer delay
+            setTimeout(bindVideoElement, 200);
             return false;
           } else {
             console.error('Failed to bind video element after maximum retries');
@@ -614,6 +622,9 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
                 muted
                 playsInline
                 className="w-full h-full object-cover"
+                onLoadedMetadata={() => console.log('Meeting video metadata loaded')}
+                onCanPlay={() => console.log('Meeting video can play')}
+                onError={(e) => console.error('Meeting video error:', e)}
               />
               <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
                 You (Local)
