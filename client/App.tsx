@@ -67,11 +67,20 @@ function AppRoutes() {
         <Route path="/join-meeting" element={<JoinMeeting />} />
         <Route path="/join-options" element={<JoinOptions />} />
         <Route path="/meeting" element={<Meeting />} />
+        <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/improved-dashboard"
+          element={
+            <ProtectedRoute>
+              <ImprovedDashboard />
             </ProtectedRoute>
           }
         />
