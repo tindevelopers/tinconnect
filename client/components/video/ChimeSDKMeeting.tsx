@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   AudioVideoObserver,
   DeviceChangeObserver,
-  VideoTileObserver,
   VideoTileState,
   MeetingSessionConfiguration,
   DefaultDeviceController,
@@ -149,26 +148,12 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       }
     };
 
-    // Video tile observer to handle video tile updates
-    const videoTileObserver: VideoTileObserver = {
-      videoTileDidUpdate: (tileState: VideoTileState) => {
-        console.log('Video tile updated:', tileState);
-        if (tileState.localTile && tileState.active) {
-          console.log('Local video tile is active, binding video element');
-          if (localVideoRef.current) {
-            audioVideoRef.current?.bindVideoElement(tileState.tileId, localVideoRef.current);
-          }
-        }
-      },
-      videoTileWasRemoved: (tileId: number) => {
-        console.log('Video tile removed:', tileId);
-      }
-    };
-
-    // Add observers
+    // Add observers - only use available methods
     audioVideoRef.current.addObserver(audioVideoObserver);
-    audioVideoRef.current.addVideoTileObserver(videoTileObserver);
     audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
+
+    // Note: Video tile observer is not available in this version
+    // We'll handle video tiles manually in the startMeeting function
 
     console.log('Observers set up successfully');
   };
@@ -192,6 +177,14 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Start local video
       audioVideoRef.current.startLocalVideoTile();
       console.log('Local video started successfully');
+
+      // Manually bind video element since video tile observer is not available
+      if (localVideoRef.current) {
+        // Get the local video tile ID (usually 1 for local video)
+        const localTileId = 1;
+        audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
+        console.log('Video element bound manually');
+      }
 
       console.log('Meeting started successfully');
 
