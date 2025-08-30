@@ -82,15 +82,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUserContext = async (userId: string) => {
     try {
+      console.log('AuthContext: loadUserContext called for userId:', userId);
       const { data, error } = await getUserContext(userId);
+      console.log('AuthContext: getUserContext result:', { data, error });
       if (error) {
         console.error('Error loading user context:', error);
         return;
       }
-      
+
       if (data) {
+        console.log('AuthContext: Setting user profile and tenant');
         setUserProfile(data);
         setTenant(data.tenants as Tenant);
+      } else {
+        console.log('AuthContext: No user context data found');
       }
     } catch (error) {
       console.error('Error loading user context:', error);
