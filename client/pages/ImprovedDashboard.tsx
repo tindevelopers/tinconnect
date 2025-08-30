@@ -139,12 +139,12 @@ export default function ImprovedDashboard() {
           <div className="flex flex-col items-center mb-6 lg:mb-8">
             <div className="relative mb-4">
               <Avatar className="w-40 h-40 lg:w-60 lg:h-60 rounded-2xl">
-                <AvatarImage 
-                  src={userProfile?.avatar_url || '/api/placeholder/240/240'} 
-                  alt={userProfile?.name || 'User'} 
+                <AvatarImage
+                  src={userProfile?.avatar_url || user?.user_metadata?.avatar_url || '/api/placeholder/240/240'}
+                  alt={userProfile?.name || user?.user_metadata?.name || 'User'}
                 />
                 <AvatarFallback className="text-4xl bg-blue-100 text-blue-600 rounded-2xl">
-                  {userProfile?.name?.[0] || user?.email?.[0] || 'U'}
+                  {(userProfile?.name || user?.user_metadata?.name || user?.email || 'U')[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-4 right-4 w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
