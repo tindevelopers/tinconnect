@@ -64,6 +64,7 @@ export const StartMeeting: React.FC<StartMeetingProps> = ({
         ...newMeeting,
         tenant_id: tenantId,
       });
+      console.log('Making API call to:', `/api/tenants/${tenantId}/meetings`);
       
       const response = await fetch(`/api/tenants/${tenantId}/meetings`, {
         method: 'POST',
@@ -74,15 +75,22 @@ export const StartMeeting: React.FC<StartMeetingProps> = ({
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (response.ok) {
         const result = await response.json();
+        console.log('Meeting creation result:', result);
         if (result.success) {
+          console.log('Meeting created successfully, calling onMeetingCreated');
           onMeetingCreated(result.data);
         } else {
+          console.error('Meeting creation failed:', result.error);
           setError(result.error || 'Failed to create meeting');
         }
       } else {
         const errorData = await response.json();
+        console.error('Meeting creation HTTP error:', errorData);
         setError(errorData.error || 'Failed to create meeting');
       }
     } catch (error) {

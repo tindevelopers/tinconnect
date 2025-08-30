@@ -12,7 +12,8 @@ export default function StartMeetingPage() {
   const [isInMeeting, setIsInMeeting] = useState(false);
 
   const handleMeetingCreated = (meeting: Meeting) => {
-    console.log('Meeting created:', meeting);
+    console.log('StartMeetingPage: Meeting created:', meeting);
+    console.log('StartMeetingPage: Setting current meeting and isInMeeting to true');
     setCurrentMeeting(meeting);
     setIsInMeeting(true);
   };
@@ -35,19 +36,21 @@ export default function StartMeetingPage() {
   console.log('StartMeetingPage - Tenant:', tenant);
   console.log('StartMeetingPage - UserProfile:', userProfile);
 
-  // If user is not authenticated, show login prompt
-  if (!user || !tenant) {
+  // If user is not authenticated, redirect to auth with return URL
+  if (!user) {
+    const currentPath = window.location.pathname;
+    window.location.href = `/auth?redirect=${encodeURIComponent(currentPath)}`;
+    return null;
+  }
+
+  // If user is authenticated but tenant is still loading, show loading
+  if (!tenant) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h1>
-          <p className="text-gray-600 mb-4">Please sign in to start or join meetings.</p>
-          <a
-            href="/auth"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Sign In
-          </a>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading...</h1>
+          <p className="text-gray-600 mb-4">Please wait while we load your account information.</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         </div>
       </div>
     );
@@ -55,6 +58,7 @@ export default function StartMeetingPage() {
 
   // If currently in a meeting, show the video meeting interface
   if (isInMeeting && currentMeeting) {
+    console.log('StartMeetingPage: Rendering ChimeSDKMeeting with meeting:', currentMeeting);
     return (
       <ChimeSDKMeeting
         meeting={currentMeeting}

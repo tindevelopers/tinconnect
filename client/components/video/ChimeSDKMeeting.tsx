@@ -78,22 +78,28 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
       // Create logger
       loggerRef.current = new ConsoleLogger('ChimeSDKMeeting', LogLevel.INFO);
 
-      // Create meeting session configuration
+      // Fetch actual Chime meeting configuration from server
+      const response = await fetch(`/api/meetings/${meeting.id}/chime-config`);
+      if (!response.ok) {
+        throw new Error('Failed to get meeting configuration');
+      }
+      
+      const configData = await response.json();
+      if (!configData.success) {
+        throw new Error(configData.error || 'Failed to get meeting configuration');
+      }
+
+      const chimeMeeting = configData.data.meeting;
+      console.log('ChimeSDKMeeting: Retrieved meeting config:', chimeMeeting);
+
+      // Create meeting session configuration with real data
       const configuration = new MeetingSessionConfiguration(
         {
           Meeting: {
-            MeetingId: meeting.chime_meeting_id || 'test-meeting-id',
-            ExternalMeetingId: meeting.id,
-            MediaRegion: 'us-east-1',
-            MediaPlacement: {
-              AudioHostUrl: 'https://audiohost.test.com',
-              AudioFallbackUrl: 'https://audiofallback.test.com',
-              ScreenDataUrl: 'https://screendata.test.com',
-              ScreenSharingUrl: 'https://screensharing.test.com',
-              ScreenViewingUrl: 'https://screenviewing.test.com',
-              SignalingUrl: 'https://signaling.test.com',
-              TurnControlUrl: 'https://turncontrol.test.com'
-            }
+            MeetingId: chimeMeeting.MeetingId,
+            ExternalMeetingId: chimeMeeting.ExternalMeetingId,
+            MediaRegion: chimeMeeting.MediaRegion,
+            MediaPlacement: chimeMeeting.MediaPlacement
           }
         },
         {

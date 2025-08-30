@@ -149,6 +149,35 @@ export class MeetingService {
   }
 
   /**
+   * Get Chime meeting configuration for client-side initialization
+   */
+  async getChimeMeetingConfig(meetingId: string): Promise<any> {
+    try {
+      // Get the meeting
+      const { data: meeting, error: meetingError } = await supabase
+        .from('meetings')
+        .select('*')
+        .eq('id', meetingId)
+        .single();
+
+      if (meetingError || !meeting) {
+        throw new Error('Meeting not found');
+      }
+
+      // Get the actual Chime meeting details from AWS
+      const chimeMeeting = await this.chimeService.getMeeting(meeting.chime_meeting_id!);
+
+      return {
+        meeting: chimeMeeting.Meeting,
+        attendee: null, // Will be set when user joins
+      };
+    } catch (error) {
+      console.error('Error getting Chime meeting config:', error);
+      throw new Error('Failed to get meeting configuration');
+    }
+  }
+
+  /**
    * Join a meeting
    */
   async joinMeeting(request: JoinMeetingRequest): Promise<JoinMeetingResponse> {

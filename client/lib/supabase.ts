@@ -82,19 +82,31 @@ export const signUp = async (
     // If signup is successful, create the user record in the users table
     if (data.user && !error) {
       try {
-        const { error: userError } = await supabase
+        // Check if user already exists before inserting
+        const { data: existingUser } = await supabase
           .from("users")
-          .insert({
-            id: data.user.id,
-            tenant_id: userData.tenant_id,
-            email: email,
-            name: userData.name,
-            role: "user"
-          });
+          .select("id")
+          .eq("id", data.user.id)
+          .single();
 
-        if (userError) {
-          console.error("Error creating user record:", userError);
-          // Don't fail the signup, just log the error
+        if (!existingUser) {
+          // Only insert if user doesn't exist
+          const { error: userError } = await supabase
+            .from("users")
+            .insert({
+              id: data.user.id,
+              tenant_id: userData.tenant_id,
+              email: email,
+              name: userData.name,
+              role: "user"
+            });
+
+          if (userError) {
+            console.error("Error creating user record:", userError);
+            // Don't fail the signup, just log the error
+          }
+        } else {
+          console.log("User record already exists, skipping creation");
         }
       } catch (userError) {
         console.error("Error creating user record:", userError);
@@ -192,7 +204,7 @@ export const getUserContext = async (userId: string) => {
       .single();
     
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout')), 10000); // 10 second timeout
+      setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 second timeout
     });
     
     const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
@@ -241,7 +253,39 @@ export const getUserContext = async (userId: string) => {
           tenantId = tenantData.id;
         }
 
-        // Create user record
+        // Check if user already exists before inserting
+        const { data: existingUser } = await supabase
+          .from("users")
+          .select("id")
+          .eq("id", user.id)
+          .single();
+        
+        if (existingUser) {
+          console.log("getUserContext: User already exists, fetching complete record...");
+          // User exists, fetch the complete record
+          const { data: completeUser, error: fetchError } = await supabase
+            .from("users")
+            .select(`
+              *,
+              tenants (
+                id,
+                name,
+                domain,
+                settings
+              )
+            `)
+            .eq("id", user.id)
+            .single();
+          
+          if (fetchError) {
+            console.error("Error fetching existing user:", fetchError);
+            return { data: null, error: fetchError };
+          }
+          
+          return { data: completeUser, error: null };
+        }
+        
+        // Create user record only if it doesn't exist
         const { data: newUser, error: createUserError } = await supabase
           .from("users")
           .insert({
@@ -302,6 +346,30 @@ export const getUserContext = async (userId: string) => {
           error: null
         };
       }
+      
+      // For any other error, also provide fallback
+      console.log("getUserContext: Other error, providing fallback user context...");
+      return {
+        data: {
+          id: userId,
+          email: "user@example.com",
+          name: "User",
+          role: "user",
+          tenant_id: "00000000-0000-0000-0000-000000000000",
+          tenants: {
+            id: "00000000-0000-0000-0000-000000000000",
+            name: "Default Organization",
+            domain: "default.local",
+            settings: {
+              maxParticipants: 50,
+              recordingEnabled: true,
+              chatEnabled: true,
+              screenShareEnabled: true
+            }
+          }
+        },
+        error: null
+      };
       
       return { data: null, error };
     }

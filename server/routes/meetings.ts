@@ -35,7 +35,7 @@ export const createMeeting: RequestHandler = async (req, res) => {
     
     const meeting = await meetingService.createMeeting({
       ...validatedData,
-      tenantId,
+      tenant_id: tenantId,
     });
     
     const response: ApiResponse<Meeting> = {
@@ -88,6 +88,28 @@ export const getMeeting: RequestHandler = async (req, res) => {
     const response: ApiResponse<null> = {
       success: false,
       error: error instanceof Error ? error.message : "Failed to get meeting",
+    };
+    res.status(500).json(response);
+  }
+};
+
+export const getChimeMeetingConfig: RequestHandler = async (req, res) => {
+  try {
+    const { meetingId } = req.params;
+    const config = await meetingService.getChimeMeetingConfig(meetingId);
+    
+    const response: ApiResponse<any> = {
+      success: true,
+      data: config,
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error("Error getting Chime meeting config:", error);
+    
+    const response: ApiResponse<null> = {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to get meeting configuration",
     };
     res.status(500).json(response);
   }
