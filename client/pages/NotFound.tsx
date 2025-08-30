@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Home, ArrowLeft } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound: React.FC = () => {
   return (
@@ -15,7 +15,7 @@ const NotFound: React.FC = () => {
           <p className="text-gray-600 mb-8">
             Sorry, we couldn't find the page you're looking for.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild className="bg-blue-600 hover:bg-blue-700">
               <Link to="/">

@@ -1,9 +1,9 @@
-import React from 'react';
-import { Button } from '../ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Badge } from '../ui/badge';
-import { Building, ChevronDown, User } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Building, ChevronDown, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   user?: {
@@ -16,26 +16,22 @@ interface HeaderProps {
   className?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  user,
-  tenant,
-  className 
-}) => {
+export const Header: React.FC<HeaderProps> = ({ user, tenant, className }) => {
   return (
-    <header className={cn(
-      "bg-white shadow-sm border-b border-gray-200 h-18",
-      className
-    )}>
+    <header
+      className={cn(
+        "bg-white shadow-sm border-b border-gray-200 h-18",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between h-full px-6 min-h-[100px]">
         {/* Logo and Branding */}
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-3">
             {/* Logo placeholder - you can replace with actual logo */}
-            <div className="text-2xl font-bold text-blue-700">
-              rOOmZZ
-            </div>
+            <div className="text-2xl font-bold text-blue-700">rOOmZZ</div>
           </div>
-          
+
           {tenant && (
             <Badge variant="secondary" className="bg-blue-100 text-blue-800">
               <Building className="w-3 h-3 mr-1" />

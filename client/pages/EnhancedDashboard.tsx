@@ -1,39 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Separator } from '../components/ui/separator';
-import { EnhancedMeetingDashboard } from '../components/meetings/EnhancedMeetingDashboard';
-import { VideoMeeting } from '../components/video/VideoMeeting';
-import { Sidebar } from '../components/navigation/Sidebar';
-import { Header } from '../components/navigation/Header';
-import { Plus, Users, Building, LogOut, User, Video } from 'lucide-react';
-import { Tenant, User as UserProfile, Meeting } from '../../server/lib/database.types';
-import { CreateTenantRequest, CreateUserRequest } from '@shared/api';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Separator } from "../components/ui/separator";
+import { EnhancedMeetingDashboard } from "../components/meetings/EnhancedMeetingDashboard";
+import { VideoMeeting } from "../components/video/VideoMeeting";
+import { Sidebar } from "../components/navigation/Sidebar";
+import { Header } from "../components/navigation/Header";
+import { Plus, Users, Building, LogOut, User, Video } from "lucide-react";
+import {
+  Tenant,
+  User as UserProfile,
+  Meeting,
+} from "../../server/lib/database.types";
+import { CreateTenantRequest, CreateUserRequest } from "@shared/api";
 
 export default function EnhancedDashboard() {
   const { user, userProfile, tenant, signOut } = useAuth();
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [activeSection, setActiveSection] = useState('meetings');
+  const [activeSection, setActiveSection] = useState("meetings");
   const [showVideoMeeting, setShowVideoMeeting] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Form states
   const [newTenant, setNewTenant] = useState<Partial<CreateTenantRequest>>({
-    name: '',
-    domain: '',
+    name: "",
+    domain: "",
   });
   const [newUser, setNewUser] = useState<Partial<CreateUserRequest>>({
-    name: '',
-    email: '',
-    role: 'user',
+    name: "",
+    email: "",
+    role: "user",
   });
 
   useEffect(() => {
@@ -44,22 +54,22 @@ export default function EnhancedDashboard() {
 
   const handleCreateTenant = async () => {
     if (!newTenant.name || !newTenant.domain) return;
-    
+
     setLoading(true);
     try {
-      const response = await fetch('/api/tenants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/tenants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTenant),
       });
-      
+
       if (response.ok) {
         const tenant = await response.json();
         setTenants([...tenants, tenant.data]);
-        setNewTenant({ name: '', domain: '' });
+        setNewTenant({ name: "", domain: "" });
       }
     } catch (error) {
-      console.error('Error creating tenant:', error);
+      console.error("Error creating tenant:", error);
     } finally {
       setLoading(false);
     }
@@ -67,25 +77,25 @@ export default function EnhancedDashboard() {
 
   const handleCreateUser = async () => {
     if (!currentTenant || !newUser.name || !newUser.email) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/tenants/${currentTenant.id}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newUser,
           tenantId: currentTenant.id,
         }),
       });
-      
+
       if (response.ok) {
         const user = await response.json();
         setUsers([...users, user.data]);
-        setNewUser({ name: '', email: '', role: 'user' });
+        setNewUser({ name: "", email: "", role: "user" });
       }
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
     } finally {
       setLoading(false);
     }
@@ -111,16 +121,13 @@ export default function EnhancedDashboard() {
 
   if (showVideoMeeting && selectedMeeting) {
     return (
-      <VideoMeeting
-        meeting={selectedMeeting}
-        onLeave={handleLeaveMeeting}
-      />
+      <VideoMeeting meeting={selectedMeeting} onLeave={handleLeaveMeeting} />
     );
   }
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'meetings':
+      case "meetings":
         return currentTenant ? (
           <EnhancedMeetingDashboard
             tenantId={currentTenant.id}
@@ -128,11 +135,13 @@ export default function EnhancedDashboard() {
           />
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">Please select a tenant to view meetings.</p>
+            <p className="text-gray-500">
+              Please select a tenant to view meetings.
+            </p>
           </div>
         );
 
-      case 'contacts':
+      case "contacts":
         return (
           <Card className="shadow-lg">
             <CardHeader>
@@ -153,7 +162,9 @@ export default function EnhancedDashboard() {
                     id="userName"
                     placeholder="User name"
                     value={newUser.name}
-                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, name: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -163,7 +174,9 @@ export default function EnhancedDashboard() {
                     type="email"
                     placeholder="user@example.com"
                     value={newUser.email}
-                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, email: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -172,7 +185,9 @@ export default function EnhancedDashboard() {
                     id="userRole"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     value={newUser.role}
-                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value as any })}
+                    onChange={(e) =>
+                      setNewUser({ ...newUser, role: e.target.value as any })
+                    }
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
@@ -180,8 +195,8 @@ export default function EnhancedDashboard() {
                   </select>
                 </div>
                 <div className="flex items-end">
-                  <Button 
-                    onClick={handleCreateUser} 
+                  <Button
+                    onClick={handleCreateUser}
                     disabled={loading || !currentTenant}
                     className="w-full bg-blue-600 hover:bg-blue-700"
                   >
@@ -196,7 +211,10 @@ export default function EnhancedDashboard() {
               {/* Users List */}
               <div className="space-y-4">
                 {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex items-center space-x-3">
                       <Avatar>
                         <AvatarImage src={user.avatar_url || undefined} />
@@ -209,7 +227,9 @@ export default function EnhancedDashboard() {
                         <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
                     </div>
-                    <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={user.role === "admin" ? "default" : "secondary"}
+                    >
                       {user.role}
                     </Badge>
                   </div>
@@ -219,7 +239,7 @@ export default function EnhancedDashboard() {
           </Card>
         );
 
-      case 'dashboard':
+      case "dashboard":
         return (
           <Card className="shadow-lg">
             <CardHeader>
@@ -240,7 +260,9 @@ export default function EnhancedDashboard() {
                     id="tenantName"
                     placeholder="Organization name"
                     value={newTenant.name}
-                    onChange={(e) => setNewTenant({ ...newTenant, name: e.target.value })}
+                    onChange={(e) =>
+                      setNewTenant({ ...newTenant, name: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -249,12 +271,14 @@ export default function EnhancedDashboard() {
                     id="tenantDomain"
                     placeholder="example.com"
                     value={newTenant.domain}
-                    onChange={(e) => setNewTenant({ ...newTenant, domain: e.target.value })}
+                    onChange={(e) =>
+                      setNewTenant({ ...newTenant, domain: e.target.value })
+                    }
                   />
                 </div>
                 <div className="flex items-end">
-                  <Button 
-                    onClick={handleCreateTenant} 
+                  <Button
+                    onClick={handleCreateTenant}
                     disabled={loading}
                     className="w-full bg-blue-600 hover:bg-blue-700"
                   >
@@ -269,7 +293,10 @@ export default function EnhancedDashboard() {
               {/* Tenants List */}
               <div className="space-y-4">
                 {tenants.map((tenant) => (
-                  <div key={tenant.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={tenant.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  >
                     <div>
                       <p className="font-medium">{tenant.name}</p>
                       <p className="text-sm text-gray-500">{tenant.domain}</p>
@@ -294,7 +321,8 @@ export default function EnhancedDashboard() {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace('-', ' ')}
+                {activeSection.charAt(0).toUpperCase() +
+                  activeSection.slice(1).replace("-", " ")}
               </h3>
               <p className="text-gray-500">This section is coming soon.</p>
             </div>
@@ -307,7 +335,11 @@ export default function EnhancedDashboard() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header - Full Width */}
       <Header
-        user={userProfile ? { name: userProfile.name, avatar_url: userProfile.avatar_url } : undefined}
+        user={
+          userProfile
+            ? { name: userProfile.name, avatar_url: userProfile.avatar_url }
+            : undefined
+        }
         tenant={currentTenant ? { name: currentTenant.name } : undefined}
       />
 
@@ -321,9 +353,7 @@ export default function EnhancedDashboard() {
         />
 
         {/* Main Content */}
-        <main className="flex-1">
-          {renderContent()}
-        </main>
+        <main className="flex-1">{renderContent()}</main>
       </div>
     </div>
   );

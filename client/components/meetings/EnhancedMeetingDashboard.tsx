@@ -1,30 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Plus, Video, Calendar, Clock, Users, MessageSquare } from 'lucide-react';
-import { Meeting } from '../../../server/lib/database.types';
-import { CreateMeetingRequest } from '@shared/api';
-import { MeetingTable } from './MeetingTable';
+import React, { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import {
+  Plus,
+  Video,
+  Calendar,
+  Clock,
+  Users,
+  MessageSquare,
+} from "lucide-react";
+import { Meeting } from "../../../server/lib/database.types";
+import { CreateMeetingRequest } from "@shared/api";
+import { MeetingTable } from "./MeetingTable";
 
 interface EnhancedMeetingDashboardProps {
   tenantId: string;
   onJoinMeeting: (meeting: Meeting) => void;
 }
 
-export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> = ({
-  tenantId,
-  onJoinMeeting,
-}) => {
+export const EnhancedMeetingDashboard: React.FC<
+  EnhancedMeetingDashboardProps
+> = ({ tenantId, onJoinMeeting }) => {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newMeeting, setNewMeeting] = useState<Partial<CreateMeetingRequest>>({
-    title: '',
-    description: '',
-    host_id: '',
+    title: "",
+    description: "",
+    host_id: "",
   });
 
   useEffect(() => {
@@ -40,7 +52,7 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
         setMeetings(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching meetings:', error);
+      console.error("Error fetching meetings:", error);
     } finally {
       setLoading(false);
     }
@@ -51,8 +63,8 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
 
     try {
       const response = await fetch(`/api/tenants/${tenantId}/meetings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newMeeting,
           tenant_id: tenantId,
@@ -62,17 +74,17 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
       if (response.ok) {
         const data = await response.json();
         setMeetings([data.data, ...meetings]);
-        setNewMeeting({ title: '', description: '', host_id: '' });
+        setNewMeeting({ title: "", description: "", host_id: "" });
         setShowCreateForm(false);
       }
     } catch (error) {
-      console.error('Error creating meeting:', error);
+      console.error("Error creating meeting:", error);
     }
   };
 
   const handleEditMeeting = (meeting: Meeting) => {
     // Implement edit functionality
-    console.log('Edit meeting:', meeting);
+    console.log("Edit meeting:", meeting);
   };
 
   if (loading) {
@@ -105,7 +117,9 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
                   id="meetingTitle"
                   placeholder="Enter meeting title"
                   value={newMeeting.title}
-                  onChange={(e) => setNewMeeting({ ...newMeeting, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewMeeting({ ...newMeeting, title: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -114,7 +128,9 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
                   id="meetingHost"
                   placeholder="Host user ID"
                   value={newMeeting.host_id}
-                  onChange={(e) => setNewMeeting({ ...newMeeting, host_id: e.target.value })}
+                  onChange={(e) =>
+                    setNewMeeting({ ...newMeeting, host_id: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -124,15 +140,23 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
                 id="meetingDescription"
                 placeholder="Meeting description"
                 value={newMeeting.description}
-                onChange={(e) => setNewMeeting({ ...newMeeting, description: e.target.value })}
+                onChange={(e) =>
+                  setNewMeeting({ ...newMeeting, description: e.target.value })
+                }
               />
             </div>
             <div className="flex space-x-2 pt-4">
-              <Button onClick={handleCreateMeeting} className="bg-blue-600 hover:bg-blue-700">
+              <Button
+                onClick={handleCreateMeeting}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Meeting
               </Button>
-              <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateForm(false)}
+              >
                 Cancel
               </Button>
             </div>
@@ -142,7 +166,7 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
 
       {/* Meeting Table */}
       {meetings.length > 0 ? (
-        <MeetingTable 
+        <MeetingTable
           meetings={meetings}
           onJoinMeeting={onJoinMeeting}
           onEditMeeting={handleEditMeeting}
@@ -154,11 +178,14 @@ export const EnhancedMeetingDashboard: React.FC<EnhancedMeetingDashboardProps> =
               <Video className="h-8 w-8 text-blue-600" />
             </div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Meetings Yet</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No Meetings Yet
+          </h3>
           <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            Create your first meeting to get started with video conferencing and collaboration.
+            Create your first meeting to get started with video conferencing and
+            collaboration.
           </p>
-          <Button 
+          <Button
             onClick={() => setShowCreateForm(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
