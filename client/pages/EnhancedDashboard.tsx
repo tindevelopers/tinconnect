@@ -312,18 +312,18 @@ export default function EnhancedDashboard() {
       />
 
       {/* Content Area with Sidebar and Main Content */}
-      <div className="flex flex-1 relative">
-        {/* Main Content - Full Width */}
-        <main className="flex-1 p-8">
-          {renderContent()}
-        </main>
-
-        {/* Floating Sidebar */}
+      <div className="flex flex-1 gap-6 p-6">
+        {/* Floating Sidebar - Narrower */}
         <Sidebar
           activeItem={activeSection}
           onItemClick={handleSidebarItemClick}
-          className="absolute left-6 top-8 h-[calc(100vh-180px)] z-10"
+          className="h-[calc(100vh-180px)] flex-shrink-0"
         />
+
+        {/* Main Content */}
+        <main className="flex-1">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
