@@ -9,17 +9,17 @@ import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import EnhancedDashboard from './pages/EnhancedDashboard';
-import StartMeeting from './pages/StartMeeting';
-import MeetingPage from './pages/MeetingPage';
+import StartMeetingPage from './pages/StartMeetingPage';
+import Meeting from './pages/Meeting';
 import ChimeTest from './pages/ChimeTest';
-import VideoMeetingPage from './pages/VideoMeetingPage';
 import ImprovedDashboard from './pages/ImprovedDashboard';
 import EnhancedMeeting from './pages/EnhancedMeeting';
 import EnhancedMeetingDemo from './pages/EnhancedMeetingDemo';
+import Welcome from './pages/Welcome';
+import JoinMeeting from './pages/JoinMeeting';
 
 // Import components
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import VideoMeetingInterface from './pages/VideoMeetingInterface';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -32,6 +32,8 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/join-meeting" element={<JoinMeeting />} />
               
               {/* Protected routes */}
               <Route 
@@ -62,7 +64,7 @@ function App() {
                 path="/start-meeting" 
                 element={
                   <ProtectedRoute>
-                    <StartMeeting />
+                    <StartMeetingPage />
                   </ProtectedRoute>
                 } 
               />
@@ -70,23 +72,7 @@ function App() {
                 path="/meeting/:meetingId" 
                 element={
                   <ProtectedRoute>
-                    <MeetingPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/video-meeting/:meetingId" 
-                element={
-                  <ProtectedRoute>
-                    <VideoMeetingPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/video-meeting-interface/:meetingId" 
-                element={
-                  <ProtectedRoute>
-                    <VideoMeetingInterface />
+                    <Meeting />
                   </ProtectedRoute>
                 } 
               />
@@ -115,7 +101,7 @@ function App() {
                 } 
               />
 
-              {/* Redirect /dashboard to /enhanced-dashboard for new experience */}
+              {/* Redirect /main to /enhanced-dashboard for new experience */}
               <Route path="/main" element={<Navigate to="/enhanced-dashboard" replace />} />
               
               {/* Catch all route */}

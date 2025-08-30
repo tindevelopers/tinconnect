@@ -1,5 +1,6 @@
 /** @import must precede all other statements */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+@import url('./styles/enhanced-dashboard.css');
 
 @tailwind base;
 @tailwind components;
@@ -107,6 +108,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* Import enhanced dashboard styles */
-@import url('./styles/enhanced-dashboard.css');
