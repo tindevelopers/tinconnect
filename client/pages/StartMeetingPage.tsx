@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { StartMeeting } from '../components/meetings/StartMeeting';
 import { ChimeVideoMeeting } from '../components/video/ChimeVideoMeeting';
-import { ChimeSDKMeeting } from '../components/video/ChimeSDKMeeting';
+import ChimeSDKMeeting from '../components/video/ChimeSDKMeeting';
 import { Meeting } from '@shared/api';
 
 export default function StartMeetingPage() {
@@ -62,7 +62,6 @@ export default function StartMeetingPage() {
     return (
       <ChimeSDKMeeting
         meeting={currentMeeting}
-        joinData={joinData}
         onLeave={handleLeaveMeeting}
       />
     );
