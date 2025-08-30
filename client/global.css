@@ -107,3 +107,6 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Import enhanced dashboard styles */
+@import url('./styles/enhanced-dashboard.css');
