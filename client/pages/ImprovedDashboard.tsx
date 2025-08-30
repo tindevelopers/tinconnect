@@ -48,6 +48,15 @@ export default function ImprovedDashboard() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Redirect to auth if no user or loading timed out
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    } else if (loading && dashboardTimeout) {
+      navigate("/auth");
+    }
+  }, [loading, user, dashboardTimeout, navigate]);
+
   // Show loading state while auth is being determined (with timeout)
   if (loading && !dashboardTimeout) {
     return (
@@ -70,9 +79,8 @@ export default function ImprovedDashboard() {
     );
   }
 
-  // If loading timed out or no user, redirect to auth
+  // Show loading or return null while redirecting
   if (!user || (loading && dashboardTimeout)) {
-    navigate("/auth");
     return null;
   }
 

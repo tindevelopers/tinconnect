@@ -114,7 +114,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { data, error } = await getUserContext(userId);
       console.log("AuthContext: getUserContext result:", { data, error });
       if (error) {
-        console.error("Error loading user context:", error);
+        console.error(
+          "Error loading user context:",
+          (error as any)?.message || error,
+        );
         return;
       }
 
@@ -126,7 +129,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log("AuthContext: No user context data found");
       }
     } catch (error) {
-      console.error("Error loading user context:", error);
+      console.error(
+        "Error loading user context:",
+        (error as any)?.message || error,
+      );
     }
   };
 
