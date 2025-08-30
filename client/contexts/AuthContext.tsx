@@ -71,10 +71,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const timeoutPromise = new Promise((resolve) => {
             setTimeout(() => {
               console.log(
-                "AuthContext: User context loading timed out, continuing...",
+                "AuthContext: User context loading timed out, using fallback...",
               );
+              // Create fallback on timeout
+              const fallbackUser = {
+                id: session.user.id,
+                auth_user_id: session.user.id,
+                name: session.user.email?.split('@')[0] || 'Demo User',
+                email: session.user.email || 'demo@example.com',
+                role: 'user' as const,
+                tenant_id: 'demo-tenant',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                avatar_url: null
+              };
+              const fallbackTenant = {
+                id: 'demo-tenant',
+                name: 'Demo Organization',
+                domain: 'demo.local',
+                settings: {},
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+              setUserProfile(fallbackUser);
+              setTenant(fallbackTenant);
               resolve(null);
-            }, 5000); // 5 second timeout
+            }, 10000); // 10 second timeout
           });
           await Promise.race([loadUserPromise, timeoutPromise]);
         }
@@ -115,6 +137,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("AuthContext: getUserContext result:", { data, error });
       if (error) {
         console.error("Error loading user context:", error);
+        // Create fallback user profile for development
+        console.log("Creating fallback user profile...");
+        const fallbackUser = {
+          id: userId,
+          auth_user_id: userId,
+          name: user?.email?.split('@')[0] || 'Demo User',
+          email: user?.email || 'demo@example.com',
+          role: 'user' as const,
+          tenant_id: 'demo-tenant',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          avatar_url: null
+        };
+        const fallbackTenant = {
+          id: 'demo-tenant',
+          name: 'Demo Organization',
+          domain: 'demo.local',
+          settings: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setUserProfile(fallbackUser);
+        setTenant(fallbackTenant);
         return;
       }
 

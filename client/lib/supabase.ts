@@ -241,10 +241,11 @@ export const getUserContext = async (userId: string) => {
       .single();
     
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 second timeout
+      setTimeout(() => reject(new Error('Database query timeout')), 30000); // 30 second timeout
     });
-    
+
     const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    console.log("getUserContext: Query completed with:", { data, error });
 
     // If user doesn't exist in users table, create them
     if (error && error.code === 'PGRST116') {
