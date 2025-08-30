@@ -357,10 +357,11 @@ export const getUserContext = async (userId: string) => {
     }
 
     if (error) {
-      console.error("getUserContext: Error getting user context:", error);
-      
+      const readableError = (error as any)?.message || (error as any)?.hint || (error as any)?.details || JSON.stringify(error);
+      console.error("getUserContext: Error getting user context:", readableError);
+
       // If it's a timeout or connection error, try to create a basic user context
-      if (error.message?.includes('timeout') || error.message?.includes('network')) {
+      if (readableError?.includes('timeout') || readableError?.includes('network')) {
         console.log("getUserContext: Database timeout/error, creating fallback user context...");
         return {
           data: {
