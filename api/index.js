@@ -19,6 +19,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files from the built React app
+app.use(express.static(path.join(__dirname, '../dist/spa')));
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ 
@@ -75,11 +78,8 @@ app.get("*", (req, res) => {
     return res.status(404).json({ error: "API endpoint not found" });
   }
 
-  // For now, return a simple response indicating the app should be served
-  res.json({ 
-    message: 'React app should be served here',
-    path: req.path
-  });
+  // Serve the React app's index.html for all other routes (SPA routing)
+  res.sendFile(path.join(__dirname, '../dist/spa/index.html'));
 });
 
 // Export the Express app for Vercel
