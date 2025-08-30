@@ -7,9 +7,7 @@ import {
   signUp as signUpHelper,
   signOut as signOutHelper,
   resetPassword as resetPasswordHelper,
-  getStoredSession,
-  clearStoredSession,
-} from "../lib/supabase";
+} from "../lib/supabase-simple";
 import { Tenant, User as UserProfile } from "../../server/lib/database.types";
 
 interface AuthContextType {
@@ -67,16 +65,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             session.user.id,
           );
           // Set a timeout for loading user context to prevent infinite loading
-          const loadUserPromise = loadUserContext(session.user.id);
-          const timeoutPromise = new Promise((resolve) => {
-            setTimeout(() => {
-              console.log(
-                "AuthContext: User context loading timed out, continuing...",
-              );
-              resolve(null);
-            }, 5000); // 5 second timeout
-          });
-          await Promise.race([loadUserPromise, timeoutPromise]);
+          // Load user context with built-in fallback
+          await loadUserContext(session.user.id);
         }
       } catch (error) {
         console.error("Error getting initial session:", error);
@@ -113,9 +103,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("AuthContext: loadUserContext called for userId:", userId);
       const { data, error } = await getUserContext(userId);
       console.log("AuthContext: getUserContext result:", { data, error });
-      if (error) {
-        console.error("Error loading user context:", error);
-        return;
+
+      if (data) {
+        setUserProfile(data.user);
+        setTenant(data.tenant);
+      } else {
+        console.log(
+          "No user data returned, this shouldn't happen with the new fallback system",
+        );
       }
 
       if (data) {

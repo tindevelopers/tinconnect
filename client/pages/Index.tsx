@@ -1,11 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 // Debug logging
 console.log("Index.tsx is loading...");
 
 const Index: React.FC = () => {
   console.log("Index component rendering...");
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect authenticated users to the enhanced dashboard
+    if (!loading && user) {
+      navigate("/enhanced-dashboard");
+    }
+  }, [user, loading, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
