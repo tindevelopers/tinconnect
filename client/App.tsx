@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Index from './pages/Index';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
+import BuilderExample from './pages/BuilderExample';
+import ChimeTest from './pages/ChimeTest';
 import NotFound from './pages/NotFound';
 import "./global.css";
 
@@ -48,6 +50,8 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/builder-example" element={<BuilderExample />} />
+        <Route path="/chime-test" element={<ChimeTest />} />
         <Route 
           path="/dashboard" 
           element={
