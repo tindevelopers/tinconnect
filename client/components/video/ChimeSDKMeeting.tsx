@@ -289,13 +289,16 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
         }
       }
       
+      // Wait a moment for device selection to take effect
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       audioVideoRef.current.startLocalVideoTile();
       console.log('Local video started successfully');
 
       // Manually bind video element since video tile observer is not available
       // Add a retry mechanism since the video element might not be rendered yet
       let retryCount = 0;
-      const maxRetries = 20; // Increased retries
+      const maxRetries = 30; // Increased retries
       const bindVideoElement = () => {
         if (localVideoRef.current) {
           console.log('localVideoRef.current is available, binding video element...');
@@ -314,7 +317,7 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
           retryCount++;
           if (retryCount < maxRetries) {
             // Retry after a longer delay
-            setTimeout(bindVideoElement, 200);
+            setTimeout(bindVideoElement, 300);
             return false;
           } else {
             console.error('Failed to bind video element after maximum retries');
