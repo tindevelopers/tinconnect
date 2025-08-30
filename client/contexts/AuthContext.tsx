@@ -48,7 +48,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (session?.user) {
           console.log('AuthContext: Loading user context for user:', session.user.id);
-          await loadUserContext(session.user.id);
+          // Set a timeout for loading user context to prevent infinite loading
+          const loadUserPromise = loadUserContext(session.user.id);
+          const timeoutPromise = new Promise((resolve) => {
+            setTimeout(() => {
+              console.log('AuthContext: User context loading timed out, continuing...');
+              resolve(null);
+            }, 5000); // 5 second timeout
+          });
+          await Promise.race([loadUserPromise, timeoutPromise]);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
