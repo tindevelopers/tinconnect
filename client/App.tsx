@@ -11,6 +11,7 @@ import Auth from './pages/Auth';
 import SignIn from './pages/SignIn';
 import JoinMeeting from './pages/JoinMeeting';
 import JoinOptions from './pages/JoinOptions';
+import Meeting from './pages/Meeting';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import "./global.css";
