@@ -42,7 +42,8 @@ export const signUp = async (email: string, password: string, userData: {
     email,
     password,
     options: {
-      data: userData
+      data: userData,
+      emailRedirectTo: undefined // Disable email confirmation for now
     }
   });
   return { data, error };
