@@ -316,20 +316,23 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Start local video
       console.log('Starting local video tile...');
       
-      // First start the video tile, then set the device
-      audioVideoRef.current.startLocalVideoTile();
-      console.log('Local video tile started');
-      
-      // Now set the video device after the tile is started
+      // First set the video input device, then start the video tile
       if (selectedVideoDevice) {
         console.log('Setting video input device to:', selectedVideoDevice);
         try {
           await audioVideoRef.current.chooseVideoInputDevice(selectedVideoDevice);
           console.log('Video input device set successfully');
+          
+          // Wait a moment for device selection to take effect
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
           console.error('Failed to set video input device:', error);
         }
       }
+      
+      // Now start the video tile
+      audioVideoRef.current.startLocalVideoTile();
+      console.log('Local video tile started');
       
       console.log('Local video started successfully');
 
