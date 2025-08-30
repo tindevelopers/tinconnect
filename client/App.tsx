@@ -14,6 +14,8 @@ import JoinMeeting from "./pages/JoinMeeting";
 import JoinOptions from "./pages/JoinOptions";
 import Meeting from "./pages/Meeting";
 import Dashboard from "./pages/Dashboard";
+import ImprovedDashboard from "./pages/ImprovedDashboard";
+import EnhancedMeeting from "./pages/EnhancedMeeting";
 import NotFound from "./pages/NotFound";
 
 import "./global.css";
@@ -67,6 +69,7 @@ function AppRoutes() {
         <Route path="/join-meeting" element={<JoinMeeting />} />
         <Route path="/join-options" element={<JoinOptions />} />
         <Route path="/meeting" element={<Meeting />} />
+        <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
         <Route
           path="/dashboard"
 
@@ -75,6 +78,16 @@ function AppRoutes() {
               <Dashboard />
             </ProtectedRoute>
           }
+        />
+        <Route path="/improved-dashboard" element={<ImprovedDashboard />} />
+        {/* Redirect capitalized versions to correct routes */}
+        <Route
+          path="/ImprovedDashboard"
+          element={<Navigate to="/improved-dashboard" replace />}
+        />
+        <Route
+          path="/EnhancedMeeting"
+          element={<Navigate to="/enhanced-meeting" replace />}
         />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

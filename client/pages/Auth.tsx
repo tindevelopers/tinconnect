@@ -19,7 +19,7 @@ export default function Auth() {
   }, [searchParams]);
 
   const handleSuccess = () => {
-    navigate("/dashboard");
+    navigate("/improved-dashboard");
   };
 
   const switchToSignUp = () => setMode("signup");
