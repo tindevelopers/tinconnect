@@ -188,7 +188,7 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       await audioVideoRef.current.start();
 
       // Start local video
-      audioVideoRef.current.startLocalVideo();
+      audioVideoRef.current.startLocalVideoTile();
 
       // Manually bind local video element since video tile observer is not available
       if (localVideoRef.current) {
