@@ -1,10 +1,17 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Debug logging
 console.log("Index.tsx is loading...");
 
 const Index: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to the new welcome page
+    navigate('/welcome', { replace: true });
+  }, [navigate]);
+
   console.log("Index component rendering...");
 
   return (
