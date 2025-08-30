@@ -10,7 +10,7 @@ export const testApiEndpoints = async () => {
     console.log("✅ Ping successful:", pingData);
 
     // Test demo tenant endpoints with fallback
-    const tenantId = 'demo-tenant';
+    const tenantId = '00000000-0000-0000-0000-000000000001';
     
     // Test get meetings endpoint
     console.log(`Testing /api/tenants/${tenantId}/meetings...`);

@@ -74,19 +74,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 "AuthContext: User context loading timed out, using fallback...",
               );
               // Create fallback on timeout
+              const demoTenantId = '00000000-0000-0000-0000-000000000001';
               const fallbackUser = {
                 id: session.user.id,
                 auth_user_id: session.user.id,
                 name: session.user.email?.split('@')[0] || 'Demo User',
                 email: session.user.email || 'demo@example.com',
                 role: 'user' as const,
-                tenant_id: 'demo-tenant',
+                tenant_id: demoTenantId,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 avatar_url: null
               };
               const fallbackTenant = {
-                id: 'demo-tenant',
+                id: demoTenantId,
                 name: 'Demo Organization',
                 domain: 'demo.local',
                 settings: {},
@@ -139,19 +140,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.error("Error loading user context:", error);
         // Create fallback user profile for development
         console.log("Creating fallback user profile...");
+        const demoTenantId = '00000000-0000-0000-0000-000000000001';
         const fallbackUser = {
           id: userId,
           auth_user_id: userId,
           name: user?.email?.split('@')[0] || 'Demo User',
           email: user?.email || 'demo@example.com',
           role: 'user' as const,
-          tenant_id: 'demo-tenant',
+          tenant_id: demoTenantId,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           avatar_url: null
         };
         const fallbackTenant = {
-          id: 'demo-tenant',
+          id: demoTenantId,
           name: 'Demo Organization',
           domain: 'demo.local',
           settings: {},
