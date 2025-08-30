@@ -278,7 +278,7 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       audioVideoRef.current.stopLocalVideoTile();
       setIsVideoEnabled(false);
     } else {
-      audioVideoRef.current.startLocalVideo();
+      audioVideoRef.current.startLocalVideoTile();
       setIsVideoEnabled(true);
     }
   };
