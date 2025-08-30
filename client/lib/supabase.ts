@@ -3,21 +3,26 @@ import { Database } from "../../server/lib/database.types";
 
 // Environment-aware configuration
 const isProduction = import.meta.env.PROD;
-const isPreview = import.meta.env.VITE_VERCEL_ENV === 'preview';
+const isPreview = import.meta.env.VITE_VERCEL_ENV === "preview";
 
 // Select environment variables based on deployment environment
-const supabaseUrl = isProduction 
+const supabaseUrl = isProduction
   ? import.meta.env.VITE_SUPABASE_URL
-  : import.meta.env.VITE_SUPABASE_URL_PREVIEW || import.meta.env.VITE_SUPABASE_URL;
+  : import.meta.env.VITE_SUPABASE_URL_PREVIEW ||
+    import.meta.env.VITE_SUPABASE_URL;
 
 const supabaseAnonKey = isProduction
   ? import.meta.env.VITE_SUPABASE_ANON_KEY
-  : import.meta.env.VITE_SUPABASE_ANON_KEY_PREVIEW || import.meta.env.VITE_SUPABASE_ANON_KEY;
+  : import.meta.env.VITE_SUPABASE_ANON_KEY_PREVIEW ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Debug logging
-console.log('Environment:', isProduction ? 'Production' : isPreview ? 'Preview' : 'Development');
-console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Not set');
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Set' : 'Not set');
+console.log(
+  "Environment:",
+  isProduction ? "Production" : isPreview ? "Preview" : "Development",
+);
+console.log("Supabase URL:", supabaseUrl ? "Set" : "Not set");
+console.log("Supabase Anon Key:", supabaseAnonKey ? "Set" : "Not set");
 
 // Only check for environment variables at runtime, not during build
 const checkEnvVars = () => {
