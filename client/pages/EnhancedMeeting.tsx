@@ -250,7 +250,7 @@ export default function EnhancedMeeting() {
         </div>
 
         {/* Participant Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {participants.map((participant) => (
             <Card key={participant.id} className="relative overflow-hidden bg-gray-800 border-0">
               <CardContent className="p-0 h-36">
