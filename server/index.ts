@@ -34,6 +34,7 @@ import {
   createTestMeeting,
 } from "./routes/chime-test.js";
 
+config({ path: '.env.local' });
 config();
 
 export function createServer() {
