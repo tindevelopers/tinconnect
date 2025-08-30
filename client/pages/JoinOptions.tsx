@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Monitor, Globe, Smartphone } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Monitor, Globe, Smartphone } from "lucide-react";
 
 interface MeetingInfo {
   meetingId: string;
@@ -14,34 +14,34 @@ const JoinOptions: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('pendingMeeting');
+    const stored = sessionStorage.getItem("pendingMeeting");
     if (stored) {
       setMeetingInfo(JSON.parse(stored));
     } else {
       // Redirect back to join meeting if no pending meeting
-      navigate('/join-meeting');
+      navigate("/join-meeting");
     }
   }, [navigate]);
 
-  const handleJoinOption = (option: 'desktop' | 'browser' | 'app') => {
+  const handleJoinOption = (option: "desktop" | "browser" | "app") => {
     if (!meetingInfo) return;
-    
+
     // Store the join method and proceed to meeting
-    sessionStorage.setItem('joinMethod', option);
-    
+    sessionStorage.setItem("joinMethod", option);
+
     switch (option) {
-      case 'browser':
-        navigate('/meeting', { state: meetingInfo });
+      case "browser":
+        navigate("/meeting", { state: meetingInfo });
         break;
-      case 'desktop':
+      case "desktop":
         // For now, just navigate to meeting - in real app this would trigger download
-        alert('Desktop app download would start here');
-        navigate('/meeting', { state: meetingInfo });
+        alert("Desktop app download would start here");
+        navigate("/meeting", { state: meetingInfo });
         break;
-      case 'app':
+      case "app":
         // For now, just navigate to meeting - in real app this would open mobile app
-        alert('Mobile app would open here');
-        navigate('/meeting', { state: meetingInfo });
+        alert("Mobile app would open here");
+        navigate("/meeting", { state: meetingInfo });
         break;
     }
   };
@@ -57,22 +57,24 @@ const JoinOptions: React.FC = () => {
         <div className="max-w-2xl w-full space-y-8 text-center">
           {/* Logo */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">TIN Connect</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">
+              TIN Connect
+            </h1>
           </div>
-          
+
           {/* Question */}
           <div className="mb-12">
             <h2 className="text-3xl font-medium text-blue-600">
               How do you want to join your TIN Connect meeting?
             </h2>
           </div>
-          
+
           {/* Join Options */}
           <div className="space-y-4 max-w-3xl mx-auto">
             {/* Desktop App Option */}
-            <Card 
+            <Card
               className="shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
-              onClick={() => handleJoinOption('desktop')}
+              onClick={() => handleJoinOption("desktop")}
             >
               <CardContent className="p-8">
                 <div className="flex items-center space-x-6">
@@ -90,11 +92,11 @@ const JoinOptions: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Browser Option */}
-            <Card 
+            <Card
               className="shadow-lg cursor-pointer hover:shadow-xl transition-shadow border-2 border-blue-200"
-              onClick={() => handleJoinOption('browser')}
+              onClick={() => handleJoinOption("browser")}
             >
               <CardContent className="p-8">
                 <div className="flex items-center space-x-6">
@@ -106,17 +108,18 @@ const JoinOptions: React.FC = () => {
                       Continue in the browser
                     </h3>
                     <p className="text-lg text-gray-500">
-                      You don't need to install anything, just from the browser directly.
+                      You don't need to install anything, just from the browser
+                      directly.
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Mobile App Option */}
-            <Card 
+            <Card
               className="shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
-              onClick={() => handleJoinOption('app')}
+              onClick={() => handleJoinOption("app")}
             >
               <CardContent className="p-8">
                 <div className="flex items-center space-x-6">
@@ -128,7 +131,8 @@ const JoinOptions: React.FC = () => {
                       Continue in the App
                     </h3>
                     <p className="text-lg text-gray-500">
-                      You already have the TIN Connect app? Have your meeting there.
+                      You already have the TIN Connect app? Have your meeting
+                      there.
                     </p>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Welcome: React.FC = () => {
   return (
@@ -10,9 +10,11 @@ const Welcome: React.FC = () => {
         <div className="max-w-md w-full space-y-8 text-center">
           {/* Logo */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">TIN Connect</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">
+              TIN Connect
+            </h1>
           </div>
-          
+
           {/* Welcome Message */}
           <div className="space-y-4 mb-12">
             <h2 className="text-3xl font-medium text-blue-600">
@@ -22,20 +24,20 @@ const Welcome: React.FC = () => {
               Easily connect with your friends, family and co-workers.
             </p>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="space-y-4 w-full max-w-md mx-auto">
             <Link to="/join-meeting" className="block">
-              <Button 
+              <Button
                 className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white text-xl font-medium rounded-2xl"
                 size="lg"
               >
                 Join a meeting
               </Button>
             </Link>
-            
+
             <Link to="/auth" className="block">
-              <Button 
+              <Button
                 className="w-full h-16 bg-teal-500 hover:bg-teal-600 text-white text-xl font-medium rounded-2xl"
                 size="lg"
               >
@@ -43,19 +45,22 @@ const Welcome: React.FC = () => {
               </Button>
             </Link>
           </div>
-          
+
           {/* Sign Up Link */}
           <div className="mt-8">
             <p className="text-gray-500">
-              Don't have an account?{' '}
-              <Link to="/auth?mode=signup" className="text-blue-600 font-medium hover:text-blue-700">
+              Don't have an account?{" "}
+              <Link
+                to="/auth?mode=signup"
+                className="text-blue-600 font-medium hover:text-blue-700"
+              >
                 Sign up for free.
               </Link>
             </p>
           </div>
         </div>
       </div>
-      
+
       {/* Footer */}
       <footer className="pb-8">
         <div className="text-center">

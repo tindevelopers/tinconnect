@@ -1,24 +1,27 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 
 const JoinMeeting: React.FC = () => {
-  const [meetingId, setMeetingId] = useState('');
-  const [userName, setUserName] = useState('');
+  const [meetingId, setMeetingId] = useState("");
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (meetingId.trim() && userName.trim()) {
       // Store the meeting info and navigate to join options
-      sessionStorage.setItem('pendingMeeting', JSON.stringify({
-        meetingId: meetingId.trim(),
-        userName: userName.trim()
-      }));
-      navigate('/join-options');
+      sessionStorage.setItem(
+        "pendingMeeting",
+        JSON.stringify({
+          meetingId: meetingId.trim(),
+          userName: userName.trim(),
+        }),
+      );
+      navigate("/join-options");
     }
   };
 
@@ -29,9 +32,11 @@ const JoinMeeting: React.FC = () => {
         <div className="max-w-md w-full space-y-8 text-center">
           {/* Logo */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">TIN Connect</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">
+              TIN Connect
+            </h1>
           </div>
-          
+
           {/* Welcome Message */}
           <div className="space-y-4 mb-12">
             <h2 className="text-3xl font-medium text-blue-600">
@@ -41,12 +46,15 @@ const JoinMeeting: React.FC = () => {
               Easily connect with your friends, family and co-workers.
             </p>
           </div>
-          
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Meeting ID Field */}
             <div className="space-y-2">
-              <Label htmlFor="meetingId" className="text-left block text-xl text-blue-600 font-medium">
+              <Label
+                htmlFor="meetingId"
+                className="text-left block text-xl text-blue-600 font-medium"
+              >
                 Meeting ID
               </Label>
               <Card className="shadow-lg">
@@ -63,10 +71,13 @@ const JoinMeeting: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-            
+
             {/* User Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="userName" className="text-left block text-xl text-blue-600 font-medium">
+              <Label
+                htmlFor="userName"
+                className="text-left block text-xl text-blue-600 font-medium"
+              >
                 Your name
               </Label>
               <Card className="shadow-lg">
@@ -83,10 +94,10 @@ const JoinMeeting: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-            
+
             {/* Continue Button */}
             <div className="pt-4">
-              <Button 
+              <Button
                 type="submit"
                 className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white text-xl font-medium rounded-2xl"
                 size="lg"
@@ -95,18 +106,24 @@ const JoinMeeting: React.FC = () => {
               </Button>
             </div>
           </form>
-          
+
           {/* Additional Links */}
           <div className="mt-8 space-y-2">
             <div>
-              <Link to="/auth?forgot=true" className="text-blue-600 font-medium hover:text-blue-700">
+              <Link
+                to="/auth?forgot=true"
+                className="text-blue-600 font-medium hover:text-blue-700"
+              >
                 Forgot your password?
               </Link>
             </div>
             <div>
               <p className="text-gray-500">
-                Don't have an account?{' '}
-                <Link to="/auth?mode=signup" className="text-blue-600 font-medium hover:text-blue-700">
+                Don't have an account?{" "}
+                <Link
+                  to="/auth?mode=signup"
+                  className="text-blue-600 font-medium hover:text-blue-700"
+                >
                   Sign up for free.
                 </Link>
               </p>
@@ -114,7 +131,7 @@ const JoinMeeting: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Footer */}
       <footer className="pb-8">
         <div className="text-center">

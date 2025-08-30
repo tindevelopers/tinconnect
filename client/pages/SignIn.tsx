@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,14 +24,14 @@ const SignIn: React.FC = () => {
 
     try {
       const { error } = await signIn(email, password);
-      
+
       if (error) {
         setError(error.message);
       } else {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -44,9 +44,11 @@ const SignIn: React.FC = () => {
         <div className="max-w-md w-full space-y-8 text-center">
           {/* Logo */}
           <div className="mb-12">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">TIN Connect</h1>
+            <h1 className="text-4xl font-bold text-blue-600 mb-2">
+              TIN Connect
+            </h1>
           </div>
-          
+
           {/* Welcome Message */}
           <div className="space-y-4 mb-12">
             <h2 className="text-3xl font-medium text-blue-600">
@@ -56,7 +58,7 @@ const SignIn: React.FC = () => {
               Easily connect with your friends, family and co-workers.
             </p>
           </div>
-          
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
@@ -64,10 +66,13 @@ const SignIn: React.FC = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-left block text-xl text-blue-600 font-medium">
+              <Label
+                htmlFor="email"
+                className="text-left block text-xl text-blue-600 font-medium"
+              >
                 E-mail
               </Label>
               <Card className="shadow-lg">
@@ -85,10 +90,13 @@ const SignIn: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-            
+
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-left block text-xl text-blue-600 font-medium">
+              <Label
+                htmlFor="password"
+                className="text-left block text-xl text-blue-600 font-medium"
+              >
                 Password
               </Label>
               <Card className="shadow-lg">
@@ -119,31 +127,37 @@ const SignIn: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-            
+
             {/* Sign In Button */}
             <div className="pt-4">
-              <Button 
+              <Button
                 type="submit"
                 className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white text-xl font-medium rounded-2xl"
                 size="lg"
                 disabled={loading}
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? "Signing in..." : "Sign in"}
               </Button>
             </div>
           </form>
-          
+
           {/* Additional Links */}
           <div className="mt-8 space-y-2">
             <div>
-              <Link to="/auth?forgot=true" className="text-blue-600 font-medium hover:text-blue-700">
+              <Link
+                to="/auth?forgot=true"
+                className="text-blue-600 font-medium hover:text-blue-700"
+              >
                 Forgot your password?
               </Link>
             </div>
             <div>
               <p className="text-gray-500">
-                Don't have an account?{' '}
-                <Link to="/auth?mode=signup" className="text-blue-600 font-medium hover:text-blue-700">
+                Don't have an account?{" "}
+                <Link
+                  to="/auth?mode=signup"
+                  className="text-blue-600 font-medium hover:text-blue-700"
+                >
                   Sign up for free.
                 </Link>
               </p>
@@ -151,7 +165,7 @@ const SignIn: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Footer */}
       <footer className="pb-8">
         <div className="text-center">
