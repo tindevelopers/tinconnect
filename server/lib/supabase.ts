@@ -1,9 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+// Environment-aware configuration
+const isProduction = process.env.NODE_ENV === 'production';
+const isPreview = process.env.VERCEL_ENV === 'preview';
+
+// Select environment variables based on deployment environment
+const supabaseUrl = isProduction 
+  ? process.env.SUPABASE_URL
+  : process.env.SUPABASE_URL_PREVIEW || process.env.SUPABASE_URL;
+
+const supabaseServiceKey = isProduction
+  ? process.env.SUPABASE_SERVICE_ROLE_KEY
+  : process.env.SUPABASE_SERVICE_ROLE_KEY_PREVIEW || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabaseAnonKey = isProduction
+  ? process.env.SUPABASE_ANON_KEY
+  : process.env.SUPABASE_ANON_KEY_PREVIEW || process.env.SUPABASE_ANON_KEY;
+
+// Debug logging
+console.log('Server Environment:', isProduction ? 'Production' : isPreview ? 'Preview' : 'Development');
+console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Not set');
+console.log('Supabase Service Key:', supabaseServiceKey ? 'Set' : 'Not set');
 
 // Only check for environment variables at runtime, not during build
 const checkEnvVars = () => {

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import ImprovedDashboard from "./pages/ImprovedDashboard";
 import EnhancedMeeting from "./pages/EnhancedMeeting";
 import NotFound from "./pages/NotFound";
+
 import "./global.css";
 
 // Debug logging
@@ -70,6 +72,7 @@ function AppRoutes() {
         <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
         <Route
           path="/dashboard"
+
           element={
             <ProtectedRoute>
               <Dashboard />
