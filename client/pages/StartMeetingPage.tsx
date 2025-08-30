@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { StartMeeting } from '../components/meetings/StartMeeting';
+import { StartMeetingServerless } from '../components/meetings/StartMeetingServerless';
 import { ChimeVideoMeeting } from '../components/video/ChimeVideoMeeting';
-import ChimeSDKMeeting from '../components/video/ChimeSDKMeeting';
+import ChimeSDKServerless from '../components/video/ChimeSDKServerless';
 import { Meeting } from '@shared/api';
 
 export default function StartMeetingPage() {
@@ -60,7 +60,7 @@ export default function StartMeetingPage() {
   if (isInMeeting && currentMeeting) {
     console.log('StartMeetingPage: Rendering ChimeSDKMeeting with meeting:', currentMeeting);
     return (
-      <ChimeSDKMeeting
+      <ChimeSDKServerless
         meeting={currentMeeting}
         onLeave={handleLeaveMeeting}
       />
@@ -69,7 +69,7 @@ export default function StartMeetingPage() {
 
   // Show the start meeting interface
   return (
-    <StartMeeting
+            <StartMeetingServerless
       tenantId={tenant.id}
       userId={user.id}
       userName={userProfile?.name || user.email || 'User'}

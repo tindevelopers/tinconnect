@@ -72,7 +72,14 @@ function AppRoutes() {
         <Route path="/join-options" element={<JoinOptions />} />
         <Route path="/meeting" element={<Meeting />} />
         <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
-        <Route path="/start-meeting" element={<StartMeetingPage />} />
+        <Route
+          path="/start-meeting"
+          element={
+            <ProtectedRoute>
+              <StartMeetingPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/media-test" element={<MediaTest />} />
         <Route
           path="/dashboard"
