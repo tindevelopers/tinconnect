@@ -1,5 +1,11 @@
-import { ChimeSDKMeetingsClient, CreateMeetingCommand, CreateAttendeeCommand, DeleteMeetingCommand, DeleteAttendeeCommand } from '@aws-sdk/client-chime-sdk-meetings';
-import { ChimeMeetingResponse, ChimeAttendeeResponse } from '@shared/api';
+import {
+  ChimeSDKMeetingsClient,
+  CreateMeetingCommand,
+  CreateAttendeeCommand,
+  DeleteMeetingCommand,
+  DeleteAttendeeCommand,
+} from "@aws-sdk/client-chime-sdk-meetings";
+import { ChimeMeetingResponse, ChimeAttendeeResponse } from "@shared/api";
 
 export class ChimeService {
   private client: ChimeSDKMeetingsClient | null = null;
@@ -11,8 +17,8 @@ export class ChimeService {
 
   constructor() {
     // Environment-aware configuration
-    const isProduction = process.env.NODE_ENV === 'production';
-    const isPreview = process.env.VERCEL_ENV === 'preview';
+    const isProduction = process.env.NODE_ENV === "production";
+    const isPreview = process.env.VERCEL_ENV === "preview";
     const isDevelopment = !isProduction && !isPreview;
 
     // Select environment variables based on deployment environment
@@ -26,28 +32,39 @@ export class ChimeService {
 
     const awsSecretAccessKey = isProduction
       ? process.env.AWS_SECRET_ACCESS_KEY
-      : process.env.AWS_SECRET_ACCESS_KEY_PREVIEW || process.env.AWS_SECRET_ACCESS_KEY;
+      : process.env.AWS_SECRET_ACCESS_KEY_PREVIEW ||
+        process.env.AWS_SECRET_ACCESS_KEY;
 
     // Debug logging
-    console.log('ChimeService Environment:', isProduction ? 'Production' : isPreview ? 'Preview' : 'Development');
-    console.log('AWS Region:', awsRegion);
-    console.log('AWS Access Key ID:', awsAccessKeyId ? 'Set' : 'Not set');
-    console.log('AWS Secret Access Key:', awsSecretAccessKey ? 'Set' : 'Not set');
+    console.log(
+      "ChimeService Environment:",
+      isProduction ? "Production" : isPreview ? "Preview" : "Development",
+    );
+    console.log("AWS Region:", awsRegion);
+    console.log("AWS Access Key ID:", awsAccessKeyId ? "Set" : "Not set");
+    console.log(
+      "AWS Secret Access Key:",
+      awsSecretAccessKey ? "Set" : "Not set",
+    );
 
     // In development, credentials are optional - we'll check them when actually needed
     if (isDevelopment && (!awsAccessKeyId || !awsSecretAccessKey)) {
-      console.warn('AWS credentials not configured for development. Chime SDK features will not be available.');
+      console.warn(
+        "AWS credentials not configured for development. Chime SDK features will not be available.",
+      );
       return;
     }
 
     // In production/preview, credentials are required
     if (!awsAccessKeyId || !awsSecretAccessKey) {
-      throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
+      throw new Error(
+        "AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
+      );
     }
 
     // Store credentials for lazy initialization
     this.credentials = {
-      region: awsRegion || 'us-east-1',
+      region: awsRegion || "us-east-1",
       accessKeyId: awsAccessKeyId,
       secretAccessKey: awsSecretAccessKey,
     };
@@ -55,7 +72,9 @@ export class ChimeService {
 
   private ensureClient(): ChimeSDKMeetingsClient {
     if (!this.credentials) {
-      throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
+      throw new Error(
+        "AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
+      );
     }
 
     if (!this.client) {
@@ -80,7 +99,7 @@ export class ChimeService {
     MediaRegion: string;
   }): Promise<ChimeMeetingResponse> {
     try {
-      console.log('Creating Chime meeting with params:', {
+      console.log("Creating Chime meeting with params:", {
         ClientRequestToken: params.ClientRequestToken,
         ExternalMeetingId: params.ExternalMeetingId,
         MediaRegion: params.MediaRegion,
@@ -94,23 +113,28 @@ export class ChimeService {
 
       const client = this.ensureClient();
       const response = await client.send(command);
-      console.log('Chime meeting created successfully:', response.Meeting?.MeetingId);
-      
+      console.log(
+        "Chime meeting created successfully:",
+        response.Meeting?.MeetingId,
+      );
+
       return response as ChimeMeetingResponse;
     } catch (error) {
-      console.error('Error creating Chime meeting:', error);
-      
+      console.error("Error creating Chime meeting:", error);
+
       // Provide more specific error messages
       if (error instanceof Error) {
-        if (error.message.includes('AccessDenied')) {
-          throw new Error('AWS credentials are invalid or insufficient permissions');
+        if (error.message.includes("AccessDenied")) {
+          throw new Error(
+            "AWS credentials are invalid or insufficient permissions",
+          );
         }
-        if (error.message.includes('InvalidParameter')) {
-          throw new Error('Invalid parameters provided for meeting creation');
+        if (error.message.includes("InvalidParameter")) {
+          throw new Error("Invalid parameters provided for meeting creation");
         }
       }
-      
-      throw new Error('Failed to create Chime meeting');
+
+      throw new Error("Failed to create Chime meeting");
     }
   }
 
@@ -122,7 +146,7 @@ export class ChimeService {
     ExternalUserId: string;
   }): Promise<ChimeAttendeeResponse> {
     try {
-      console.log('Creating Chime attendee with params:', {
+      console.log("Creating Chime attendee with params:", {
         MeetingId: params.MeetingId,
         ExternalUserId: params.ExternalUserId,
       });
@@ -134,23 +158,26 @@ export class ChimeService {
 
       const client = this.ensureClient();
       const response = await client.send(command);
-      console.log('Chime attendee created successfully:', response.Attendee?.AttendeeId);
-      
+      console.log(
+        "Chime attendee created successfully:",
+        response.Attendee?.AttendeeId,
+      );
+
       return response as ChimeAttendeeResponse;
     } catch (error) {
-      console.error('Error creating Chime attendee:', error);
-      
+      console.error("Error creating Chime attendee:", error);
+
       // Provide more specific error messages
       if (error instanceof Error) {
-        if (error.message.includes('NotFound')) {
-          throw new Error('Meeting not found');
+        if (error.message.includes("NotFound")) {
+          throw new Error("Meeting not found");
         }
-        if (error.message.includes('Conflict')) {
-          throw new Error('Attendee already exists for this meeting');
+        if (error.message.includes("Conflict")) {
+          throw new Error("Attendee already exists for this meeting");
         }
       }
-      
-      throw new Error('Failed to create Chime attendee');
+
+      throw new Error("Failed to create Chime attendee");
     }
   }
 
@@ -159,7 +186,7 @@ export class ChimeService {
    */
   async deleteMeeting(meetingId: string): Promise<void> {
     try {
-      console.log('Deleting Chime meeting:', meetingId);
+      console.log("Deleting Chime meeting:", meetingId);
 
       const command = new DeleteMeetingCommand({
         MeetingId: meetingId,
@@ -167,9 +194,9 @@ export class ChimeService {
 
       const client = this.ensureClient();
       await client.send(command);
-      console.log('Chime meeting deleted successfully:', meetingId);
+      console.log("Chime meeting deleted successfully:", meetingId);
     } catch (error) {
-      console.error('Error deleting Chime meeting:', error);
+      console.error("Error deleting Chime meeting:", error);
       // Don't throw error for cleanup operations, but log it
     }
   }
@@ -179,7 +206,7 @@ export class ChimeService {
    */
   async deleteAttendee(meetingId: string, attendeeId: string): Promise<void> {
     try {
-      console.log('Deleting Chime attendee:', { meetingId, attendeeId });
+      console.log("Deleting Chime attendee:", { meetingId, attendeeId });
 
       const command = new DeleteAttendeeCommand({
         MeetingId: meetingId,
@@ -188,9 +215,9 @@ export class ChimeService {
 
       const client = this.ensureClient();
       await client.send(command);
-      console.log('Chime attendee deleted successfully:', attendeeId);
+      console.log("Chime attendee deleted successfully:", attendeeId);
     } catch (error) {
-      console.error('Error deleting Chime attendee:', error);
+      console.error("Error deleting Chime attendee:", error);
       // Don't throw error for cleanup operations, but log it
     }
   }
@@ -198,15 +225,20 @@ export class ChimeService {
   /**
    * Generate a join token for an attendee
    */
-  async generateJoinToken(meetingId: string, attendeeId: string): Promise<string> {
+  async generateJoinToken(
+    meetingId: string,
+    attendeeId: string,
+  ): Promise<string> {
     try {
       // This would typically involve creating a JWT token
       // For now, we'll return a simple token
-      const token = Buffer.from(`${meetingId}:${attendeeId}:${Date.now()}`).toString('base64');
+      const token = Buffer.from(
+        `${meetingId}:${attendeeId}:${Date.now()}`,
+      ).toString("base64");
       return token;
     } catch (error) {
-      console.error('Error generating join token:', error);
-      throw new Error('Failed to generate join token');
+      console.error("Error generating join token:", error);
+      throw new Error("Failed to generate join token");
     }
   }
 
@@ -215,13 +247,13 @@ export class ChimeService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      console.log('Testing Chime SDK connection...');
-      
+      console.log("Testing Chime SDK connection...");
+
       // Try to create a test meeting
       const testMeeting = await this.createMeeting({
         ClientRequestToken: `test-${Date.now()}`,
         ExternalMeetingId: `test-external-${Date.now()}`,
-        MediaRegion: process.env.AWS_REGION || 'us-east-1',
+        MediaRegion: process.env.AWS_REGION || "us-east-1",
       });
 
       // Clean up the test meeting
@@ -229,10 +261,10 @@ export class ChimeService {
         await this.deleteMeeting(testMeeting.Meeting.MeetingId);
       }
 
-      console.log('Chime SDK connection test successful');
+      console.log("Chime SDK connection test successful");
       return true;
     } catch (error) {
-      console.error('Chime SDK connection test failed:', error);
+      console.error("Chime SDK connection test failed:", error);
       return false;
     }
   }
