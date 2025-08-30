@@ -8,7 +8,9 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { Loader2, Video, Users, Calendar, Clock, Settings, Mic, MicOff, Video as VideoIcon, VideoOff } from 'lucide-react';
 
 // Serverless API configuration
-const SERVERLESS_API_BASE = 'http://localhost:8082/api'; // Using our CORS proxy
+const SERVERLESS_API_BASE = process.env.NODE_ENV === 'production' 
+  ? 'https://wlid311tl7.execute-api.us-east-1.amazonaws.com/Prod' // Production AWS API Gateway
+  : 'http://localhost:8082/api'; // Development CORS proxy
 
 interface StartMeetingServerlessProps {
   tenantId: string;

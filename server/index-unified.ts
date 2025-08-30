@@ -1,6 +1,8 @@
 import express from 'express';
 import { config } from 'dotenv';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { handlePing } from './routes/ping.js';
 import { handleDemo } from './routes/demo.js';
 import { getTenant, getUsers } from './routes/tenants.js';
@@ -9,8 +11,12 @@ import { getTenant, getUsers } from './routes/tenants.js';
 config({ path: '.env.local' }); // Load local environment variables first
 config(); // Then load any other .env files
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const PORT = process.env.PORT || 8081; // Use port 8081 to avoid conflict with Vite
+const PORT = process.env.PORT || 8080;
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Middleware
 app.use(cors({
@@ -41,35 +47,51 @@ app.get('/api/demo', handleDemo);
 app.get('/api/tenants/:tenantId', getTenant);
 app.get('/api/tenants/:tenantId/users', getUsers);
 
+// Serve static files
+if (isDevelopment) {
+  // In development, serve from the Vite dev server
+  // We'll proxy to Vite dev server for the React app
+  console.log('🔧 Development mode: API server only');
+  console.log('📝 Start Vite dev server separately with: npm run dev:client');
+} else {
+  // In production, serve the built React app
+  app.use(express.static(path.join(__dirname, '../dist/spa')));
+  
+  // Handle SPA routing - serve index.html for all non-API routes
+  app.get('*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    
+    // Serve index.html for all other routes (SPA routing)
+    res.sendFile(path.join(__dirname, '../dist/spa/index.html'));
+  });
+}
+
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server error:', err);
   res.status(500).json({ 
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    message: isDevelopment ? err.message : 'Something went wrong'
   });
 });
 
-// Serve static files and handle SPA routing in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('dist/spa'));
-  
-  // Handle SPA routing - serve index.html for all non-API routes
-  app.get('*', (req, res) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return res.status(404).json({ error: 'API route not found' });
-    }
-    
-    // Serve index.html for all other routes (SPA routing)
-    res.sendFile('dist/spa/index.html', { root: '.' });
-  });
-}
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
 
 app.listen(PORT, () => {
-  console.log(`🚀 Serverless-ready server running on port ${PORT}`);
+  console.log(`🚀 Unified server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔧 Meeting functionality: AWS Lambda (serverless)`);
+  console.log(`🔧 Mode: ${isDevelopment ? 'Development (API only)' : 'Production (API + React)'}`);
   console.log(`🌐 CORS origins: ${process.env.NODE_ENV === 'production' ? 'Production domains' : 'Localhost'}`);
   console.log(`📝 Health check: http://localhost:${PORT}/health`);
+  
+  if (isDevelopment) {
+    console.log(`💡 For React app, start Vite dev server: npm run dev:client`);
+    console.log(`💡 Then access React app at: http://localhost:8080 (or next available port)`);
+  }
 });

@@ -23,7 +23,9 @@ interface ChimeSDKServerlessProps {
 }
 
 // Serverless API configuration
-const SERVERLESS_API_BASE = 'http://localhost:8082/api'; // Using our CORS proxy
+const SERVERLESS_API_BASE = process.env.NODE_ENV === 'production' 
+  ? 'https://wlid311tl7.execute-api.us-east-1.amazonaws.com/Prod' // Production AWS API Gateway
+  : 'http://localhost:8082/api'; // Development CORS proxy // Using our CORS proxy
 
 const ChimeSDKServerless: React.FC<ChimeSDKServerlessProps> = ({ meeting, onLeave }) => {
   const [isConnecting, setIsConnecting] = useState(false);
