@@ -235,17 +235,20 @@ export const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({
       console.warn('AudioVideo addObserver method not available');
     }
 
-    // Real-time events
-    audioVideoRef.current.realtimeSubscribeToVolumeIndicator(
-      joinData?.attendee?.AttendeeId || 'test-attendee-id',
-      (attendeeId: string, volume: number, muted: boolean, signalStrength: number) => {
-        console.log('Volume indicator:', { attendeeId, volume, muted, signalStrength });
-      }
-    );
+    // Real-time events - only use available methods
+    if (audioVideoRef.current && typeof audioVideoRef.current.realtimeSubscribeToVolumeIndicator === 'function') {
+      audioVideoRef.current.realtimeSubscribeToVolumeIndicator(
+        joinData?.attendee?.AttendeeId || 'test-attendee-id',
+        (attendeeId: string, volume: number, muted: boolean, signalStrength: number) => {
+          console.log('Volume indicator:', { attendeeId, volume, muted, signalStrength });
+        }
+      );
+    } else {
+      console.warn('realtimeSubscribeToVolumeIndicator method not available');
+    }
 
-    audioVideoRef.current.realtimeSubscribeToLocalAudioLevel((level: number) => {
-      console.log('Local audio level:', level);
-    });
+    // Note: realtimeSubscribeToLocalAudioLevel is not available in this SDK version
+    console.log('Skipping realtimeSubscribeToLocalAudioLevel - method not available');
   };
 
   const startMeeting = async () => {
