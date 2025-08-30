@@ -28,13 +28,6 @@ import {
   endMeeting,
 } from "./routes/meetings.js";
 
-// Import Builder.io routes
-import {
-  getBuilderContent,
-  getBuilderContentByUrl,
-  getBuilderContentById,
-} from "./routes/builder.js";
-
 // Import Chime test routes
 import {
   testChimeConnection,
@@ -72,11 +65,6 @@ export function createServer() {
   app.post("/api/tenants/:tenantId/meetings/:meetingId/join", joinMeeting);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/leave", leaveMeeting);
   app.post("/api/tenants/:tenantId/meetings/:meetingId/end", endMeeting);
-
-  // Builder.io routes
-  app.get("/api/builder/content", getBuilderContent);
-  app.get("/api/builder/content/url", getBuilderContentByUrl);
-  app.get("/api/builder/content/:id", getBuilderContentById);
 
   // Chime test routes
   app.get("/api/chime/test", testChimeConnection);
