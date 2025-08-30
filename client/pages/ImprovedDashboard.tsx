@@ -34,9 +34,28 @@ const mockUpcomingMeeting = {
 };
 
 export default function ImprovedDashboard() {
-  const { user, userProfile, signOut } = useAuth();
+  const { user, userProfile, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('home');
+
+  // Show loading state while auth is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h1 className="text-2xl font-bold text-blue-600 mb-2">TIN Connect</h1>
+          <p className="text-gray-500">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no user, redirect to auth (shouldn't happen with ProtectedRoute, but safety check)
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   const handleSignOut = async () => {
     await signOut();
