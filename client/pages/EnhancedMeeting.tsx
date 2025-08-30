@@ -218,7 +218,7 @@ export default function EnhancedMeeting() {
       </div>
 
       {/* Main Meeting Area */}
-      <div className="flex-1 bg-gray-50 p-6 relative">
+      <div className="flex-1 bg-gray-50 p-4 lg:p-6 relative">
         {/* Meeting Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
