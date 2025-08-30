@@ -1,75 +1,93 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Link } from 'react-router-dom';
-import { 
-  Video, 
-  Users, 
-  MessageSquare, 
-  Monitor, 
-  Mic, 
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
+import {
+  Video,
+  Users,
+  MessageSquare,
+  Monitor,
+  Mic,
   Settings,
   Smartphone,
   Tablet,
-  Computer
-} from 'lucide-react';
+  Computer,
+} from "lucide-react";
 
 export const EnhancedFeaturesShowcase: React.FC = () => {
   const features = [
     {
-      title: 'Enhanced Dashboard',
-      description: 'Beautiful user profile with availability status, quick meeting controls, and upcoming meetings.',
-      route: '/improved-dashboard',
+      title: "Enhanced Dashboard",
+      description:
+        "Beautiful user profile with availability status, quick meeting controls, and upcoming meetings.",
+      route: "/improved-dashboard",
       icon: Users,
-      highlights: ['User Profile', 'Quick Actions', 'Meeting Overview', 'Chat Panel']
+      highlights: [
+        "User Profile",
+        "Quick Actions",
+        "Meeting Overview",
+        "Chat Panel",
+      ],
     },
     {
-      title: 'Advanced Video Meeting',
-      description: 'Professional meeting interface with participant tiles, real-time chat, and comprehensive controls.',
-      route: '/enhanced-meeting',
+      title: "Advanced Video Meeting",
+      description:
+        "Professional meeting interface with participant tiles, real-time chat, and comprehensive controls.",
+      route: "/enhanced-meeting",
       icon: Video,
-      highlights: ['Participant Grid', 'Active Speaker', 'Screen Recording', 'Chat Integration']
-    }
+      highlights: [
+        "Participant Grid",
+        "Active Speaker",
+        "Screen Recording",
+        "Chat Integration",
+      ],
+    },
   ];
 
   const capabilities = [
     {
       icon: Video,
-      title: 'HD Video Conferencing',
-      description: 'Crystal clear video with participant management'
+      title: "HD Video Conferencing",
+      description: "Crystal clear video with participant management",
     },
     {
       icon: MessageSquare,
-      title: 'Real-time Chat',
-      description: 'Integrated messaging with emoji support'
+      title: "Real-time Chat",
+      description: "Integrated messaging with emoji support",
     },
     {
       icon: Monitor,
-      title: 'Screen Sharing',
-      description: 'Share your screen with meeting participants'
+      title: "Screen Sharing",
+      description: "Share your screen with meeting participants",
     },
     {
       icon: Mic,
-      title: 'Audio Controls',
-      description: 'Advanced microphone and speaker controls'
+      title: "Audio Controls",
+      description: "Advanced microphone and speaker controls",
     },
     {
       icon: Settings,
-      title: 'Meeting Controls',
-      description: 'Recording, mute, camera, and more'
+      title: "Meeting Controls",
+      description: "Recording, mute, camera, and more",
     },
     {
       icon: Users,
-      title: 'Participant Management',
-      description: 'See who\'s speaking and manage attendees'
-    }
+      title: "Participant Management",
+      description: "See who's speaking and manage attendees",
+    },
   ];
 
   const responsiveFeatures = [
-    { icon: Smartphone, label: 'Mobile Optimized' },
-    { icon: Tablet, label: 'Tablet Friendly' },
-    { icon: Computer, label: 'Desktop Enhanced' }
+    { icon: Smartphone, label: "Mobile Optimized" },
+    { icon: Tablet, label: "Tablet Friendly" },
+    { icon: Computer, label: "Desktop Enhanced" },
   ];
 
   return (
@@ -83,7 +101,7 @@ export const EnhancedFeaturesShowcase: React.FC = () => {
           Professional Video Conferencing
         </h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Experience our redesigned meeting interface with advanced features, 
+          Experience our redesigned meeting interface with advanced features,
           intuitive controls, and seamless collaboration tools.
         </p>
       </div>
@@ -91,7 +109,10 @@ export const EnhancedFeaturesShowcase: React.FC = () => {
       {/* Main Features */}
       <div className="grid md:grid-cols-2 gap-6">
         {features.map((feature) => (
-          <Card key={feature.title} className="hover:shadow-lg transition-shadow">
+          <Card
+            key={feature.title}
+            className="hover:shadow-lg transition-shadow"
+          >
             <CardHeader>
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -114,9 +135,7 @@ export const EnhancedFeaturesShowcase: React.FC = () => {
                 ))}
               </div>
               <Link to={feature.route}>
-                <Button className="w-full">
-                  Experience {feature.title}
-                </Button>
+                <Button className="w-full">Experience {feature.title}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -125,16 +144,25 @@ export const EnhancedFeaturesShowcase: React.FC = () => {
 
       {/* Capabilities Grid */}
       <div>
-        <h2 className="text-2xl font-bold text-center mb-6">Key Capabilities</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Key Capabilities
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {capabilities.map((capability) => (
-            <div key={capability.title} className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl">
+            <div
+              key={capability.title}
+              className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl"
+            >
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <capability.icon className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">{capability.title}</h3>
-                <p className="text-sm text-gray-600">{capability.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  {capability.title}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {capability.description}
+                </p>
               </div>
             </div>
           ))}
@@ -156,7 +184,9 @@ export const EnhancedFeaturesShowcase: React.FC = () => {
                 <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
                   <feature.icon className="w-8 h-8 text-blue-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">{feature.label}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {feature.label}
+                </span>
               </div>
             ))}
           </div>
@@ -176,7 +206,11 @@ export const EnhancedFeaturesShowcase: React.FC = () => {
             </Button>
           </Link>
           <Link to="/join-meeting">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white hover:text-blue-600">
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white hover:text-blue-600"
+            >
               Join Meeting
             </Button>
           </Link>

@@ -76,13 +76,16 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/improved-dashboard"
-          element={<ImprovedDashboard />}
-        />
+        <Route path="/improved-dashboard" element={<ImprovedDashboard />} />
         {/* Redirect capitalized versions to correct routes */}
-        <Route path="/ImprovedDashboard" element={<Navigate to="/improved-dashboard" replace />} />
-        <Route path="/EnhancedMeeting" element={<Navigate to="/enhanced-meeting" replace />} />
+        <Route
+          path="/ImprovedDashboard"
+          element={<Navigate to="/improved-dashboard" replace />}
+        />
+        <Route
+          path="/EnhancedMeeting"
+          element={<Navigate to="/enhanced-meeting" replace />}
+        />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
