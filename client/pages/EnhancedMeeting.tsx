@@ -327,8 +327,16 @@ export default function EnhancedMeeting() {
           </button>
         </div>
 
+        {/* Mobile Chat Toggle */}
+        <button
+          onClick={() => setChatVisible(!chatVisible)}
+          className="lg:hidden fixed top-4 right-4 z-40 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg"
+        >
+          <MessageSquare className="w-6 h-6" />
+        </button>
+
         {/* Audio Controls */}
-        <div className="absolute right-6 top-1/2 transform -translate-y-1/2 space-y-4">
+        <div className="hidden lg:flex absolute right-6 top-1/2 transform -translate-y-1/2 space-y-4 flex-col">
           {/* Volume Control */}
           <div className="w-14 h-64 bg-gray-600 bg-opacity-60 rounded-2xl flex flex-col items-center py-6">
             <div className="flex-1 relative w-1">
