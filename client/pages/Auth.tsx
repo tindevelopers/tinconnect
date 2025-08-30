@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LoginForm } from '../components/auth/LoginForm';
 import { SignUpForm } from '../components/auth/SignUpForm';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type AuthMode = 'login' | 'signup';
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>('login');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check URL parameters for mode
+    const urlMode = searchParams.get('mode');
+    if (urlMode === 'signup') {
+      setMode('signup');
+    }
+  }, [searchParams]);
 
   const handleSuccess = () => {
     navigate('/dashboard');
