@@ -1,12 +1,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { 
-  Home, 
+import {
+  Home,
   Calendar,
   Clock,
   Users,
   Video,
-  StreamIcon as LiveStream,
+  Radio as LiveStream,
   FileText,
   Settings
 } from 'lucide-react';
