@@ -24,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Separator } from '../ui/separator';
 import { useParticipants } from '../../contexts/ParticipantContext';
 import ParticipantList from './ParticipantList';
-import ChimeSDKServerlessEnhanced from '../video/ChimeSDKServerlessEnhanced';
+import ChimeSDKServerless from '../video/ChimeSDKServerless';
 import { cn } from '../../lib/utils';
 
 interface EnhancedMeetingInterfaceProps {
@@ -83,14 +83,16 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
     )}>
       {/* Main Video Area */}
       <div className="flex-1 relative">
-        <ChimeSDKServerlessEnhanced
-          meeting={meeting}
-          currentUserId={currentUserId}
-          onLeave={onLeave}
-        />
+        {/* Video Component */}
+        <div className="w-full h-full">
+          <ChimeSDKServerless
+            meeting={meeting}
+            onLeave={onLeave}
+          />
+        </div>
         
         {/* Meeting Info Overlay */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="bg-black/50 text-white">
               {participants.length} participants
@@ -125,64 +127,70 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
           </div>
         </div>
 
-        {/* Meeting Controls */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center gap-3 bg-black/50 rounded-full p-2">
+        {/* Meeting Controls - Fixed Layout */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="flex items-center gap-2 bg-black/50 rounded-full p-3">
+            {/* Audio Control */}
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full bg-gray-700 text-white hover:bg-gray-600"
+              className="rounded-full bg-gray-700 text-white hover:bg-gray-600 w-12 h-12 flex items-center justify-center"
             >
-              <Mic className="w-4 h-4" />
+              <Mic className="w-5 h-5" />
             </Button>
             
+            {/* Video Control */}
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full bg-gray-700 text-white hover:bg-gray-600"
+              className="rounded-full bg-gray-700 text-white hover:bg-gray-600 w-12 h-12 flex items-center justify-center"
             >
-              <Video className="w-4 h-4" />
+              <Video className="w-5 h-5" />
             </Button>
             
+            {/* Screen Share Control */}
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleScreenSharing}
               className={cn(
-                "rounded-full",
+                "rounded-full w-12 h-12 flex items-center justify-center",
                 isScreenSharing 
                   ? "bg-blue-600 text-white hover:bg-blue-700" 
                   : "bg-gray-700 text-white hover:bg-gray-600"
               )}
             >
-              <Share className="w-4 h-4" />
+              <Share className="w-5 h-5" />
             </Button>
             
+            {/* Recording Control - Only for Host/Co-Host */}
             {(isHost || isCoHost) && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleRecording}
                 className={cn(
-                  "rounded-full",
+                  "rounded-full w-12 h-12 flex items-center justify-center",
                   isRecording 
                     ? "bg-red-600 text-white hover:bg-red-700" 
                     : "bg-gray-700 text-white hover:bg-gray-600"
                 )}
               >
-                {isRecording ? <Square className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                {isRecording ? <Square className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
               </Button>
             )}
             
-            <Separator orientation="vertical" className="h-6 bg-gray-600" />
+            {/* Separator */}
+            <div className="w-px h-8 bg-gray-600 mx-2"></div>
             
+            {/* Leave Meeting */}
             <Button
               variant="ghost"
               size="sm"
               onClick={onLeave}
-              className="rounded-full bg-red-600 text-white hover:bg-red-700"
+              className="rounded-full bg-red-600 text-white hover:bg-red-700 w-12 h-12 flex items-center justify-center"
             >
-              <PhoneOff className="w-4 h-4" />
+              <PhoneOff className="w-5 h-5" />
             </Button>
           </div>
         </div>
