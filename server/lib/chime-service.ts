@@ -132,7 +132,8 @@ export class ChimeService {
         ExternalUserId: params.ExternalUserId,
       });
 
-      const response = await this.client.send(command);
+      const client = this.ensureClient();
+      const response = await client.send(command);
       console.log('Chime attendee created successfully:', response.Attendee?.AttendeeId);
       
       return response as ChimeAttendeeResponse;
