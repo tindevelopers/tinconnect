@@ -92,7 +92,8 @@ export class ChimeService {
         MediaRegion: params.MediaRegion,
       });
 
-      const response = await this.client.send(command);
+      const client = this.ensureClient();
+      const response = await client.send(command);
       console.log('Chime meeting created successfully:', response.Meeting?.MeetingId);
       
       return response as ChimeMeetingResponse;
