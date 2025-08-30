@@ -186,7 +186,8 @@ export class ChimeService {
         AttendeeId: attendeeId,
       });
 
-      await this.client.send(command);
+      const client = this.ensureClient();
+      await client.send(command);
       console.log('Chime attendee deleted successfully:', attendeeId);
     } catch (error) {
       console.error('Error deleting Chime attendee:', error);
