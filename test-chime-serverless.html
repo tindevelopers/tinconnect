@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chime SDK Serverless Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .video-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        video {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .controls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Chime SDK Serverless Test</h1>
+        <p>Test video functionality with the serverless backend</p>
+        
+        <div class="form-group">
+            <label for="meetingTitle">Meeting Title:</label>
+            <input type="text" id="meetingTitle" value="test-meeting" placeholder="Enter meeting title">
+        </div>
+        
+        <div class="form-group">
+            <label for="attendeeName">Your Name:</label>
+            <input type="text" id="attendeeName" value="Test User" placeholder="Enter your name">
+        </div>
+        
+        <button id="joinBtn" onclick="joinMeeting()">Join Meeting</button>
+        <button id="leaveBtn" onclick="leaveMeeting()" disabled>Leave Meeting</button>
+        <button id="toggleVideoBtn" onclick="toggleVideo()" disabled>Toggle Video</button>
+        <button id="toggleAudioBtn" onclick="toggleAudio()" disabled>Toggle Audio</button>
+        
+        <div id="status" class="status info">Ready to join meeting</div>
+        
+        <div class="video-container">
+            <div class="video-wrapper">
+                <h3>Local Video</h3>
+                <video id="localVideo" autoplay muted playsinline></video>
+            </div>
+            <div class="video-wrapper">
+                <h3>Remote Video</h3>
+                <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <!-- Chime SDK -->
+    <script src="https://unpkg.com/amazon-chime-sdk-js@3.28.0/dist/amazon-chime-sdk.min.js"></script>
+    
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8082/api';
+        
+        // State
+        let meetingSession = null;
+        let audioVideo = null;
+        let isVideoEnabled = true;
+        let isAudioEnabled = true;
+        
+        // DOM elements
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const joinBtn = document.getElementById('joinBtn');
+        const leaveBtn = document.getElementById('leaveBtn');
+        const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+        const toggleAudioBtn = document.getElementById('toggleAudioBtn');
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+        
+        function logMessage(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        async function joinMeeting() {
+            try {
+                const meetingTitle = document.getElementById('meetingTitle').value;
+                const attendeeName = document.getElementById('attendeeName').value;
+                
+                if (!meetingTitle || !attendeeName) {
+                    updateStatus('Please enter meeting title and your name', 'error');
+                    return;
+                }
+                
+                updateStatus('Joining meeting...', 'info');
+                logMessage('Starting to join meeting...');
+                logMessage(`Making request to: ${API_BASE_URL}/join`);
+                
+                // Join meeting via serverless API
+                const response = await fetch(`${API_BASE_URL}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: meetingTitle,
+                        attendeeName: attendeeName
+                    })
+                });
+                
+                logMessage(`Response status: ${response.status}`);
+                logMessage(`Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    logMessage(`Error response body: ${errorText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const joinInfo = await response.json();
+                logMessage('Successfully joined meeting via API');
+                logMessage(`Meeting ID: ${joinInfo.JoinInfo.Meeting.MeetingId}`);
+                logMessage(`Attendee ID: ${joinInfo.JoinInfo.Attendee.AttendeeId}`);
+                
+                // Initialize Chime SDK
+                await initializeChimeMeeting(joinInfo.JoinInfo);
+                
+            } catch (error) {
+                logMessage(`Error joining meeting: ${error.message}`);
+                updateStatus(`Error joining meeting: ${error.message}`, 'error');
+            }
+        }
+        
+        async function initializeChimeMeeting(joinInfo) {
+            try {
+                logMessage('Initializing Chime SDK...');
+                
+                // Create meeting session configuration
+                const configuration = new ChimeSDKMeetings.MeetingSessionConfiguration(
+                    joinInfo.Meeting,
+                    joinInfo.Attendee
+                );
+                
+                // Create device controller
+                const deviceController = new ChimeSDKMeetings.DefaultDeviceController(
+                    new ChimeSDKMeetings.Logger('DeviceController', ChimeSDKMeetings.LogLevel.INFO),
+                    {
+                        enableWebAudio: true,
+                        enableUnifiedPlanForChromiumBasedBrowsers: true
+                    }
+                );
+                
+                // Create meeting session
+                meetingSession = new ChimeSDKMeetings.DefaultMeetingSession(
+                    configuration,
+                    new ChimeSDKMeetings.Logger('MeetingSession', ChimeSDKMeetings.LogLevel.INFO),
+                    deviceController
+                );
+                
+                audioVideo = meetingSession.audioVideo;
+                
+                // Set up observers
+                setupObservers();
+                
+                // Start the meeting
+                await startMeeting();
+                
+            } catch (error) {
+                logMessage(`Error initializing Chime meeting: ${error.message}`);
+                updateStatus(`Error initializing meeting: ${error.message}`, 'error');
+            }
+        }
+        
+        function setupObservers() {
+            logMessage('Setting up observers...');
+            
+            // Audio/Video observer
+            const audioVideoObserver = {
+                audioVideoDidStart: () => {
+                    logMessage('Audio/Video started');
+                    updateStatus('Meeting started successfully', 'success');
+                },
+                audioVideoDidStop: (sessionStatus) => {
+                    logMessage(`Audio/Video stopped: ${sessionStatus.statusCode()}`);
+                    updateStatus('Meeting ended', 'info');
+                },
+                audioVideoDidFail: (sessionStatus) => {
+                    logMessage(`Audio/Video failed: ${sessionStatus.statusCode()}`);
+                    updateStatus('Meeting failed', 'error');
+                }
+            };
+            
+            // Video tile observer
+            const videoTileObserver = {
+                videoTileDidUpdate: (tileState) => {
+                    logMessage(`Video tile updated: ${tileState.tileId}, bound: ${tileState.boundAttendeeId}`);
+                    
+                    if (tileState.localTile) {
+                        // Local video
+                        audioVideo.bindVideoElement(tileState.tileId, localVideo);
+                        logMessage('Local video bound successfully');
+                    } else {
+                        // Remote video
+                        audioVideo.bindVideoElement(tileState.tileId, remoteVideo);
+                        logMessage('Remote video bound successfully');
+                    }
+                },
+                videoTileWasRemoved: (tileId) => {
+                    logMessage(`Video tile removed: ${tileId}`);
+                }
+            };
+            
+            // Device change observer
+            const deviceChangeObserver = {
+                audioInputsChanged: (freshAudioInputDeviceList) => {
+                    logMessage(`Audio inputs changed: ${freshAudioInputDeviceList.length} devices`);
+                },
+                videoInputsChanged: (freshVideoInputDeviceList) => {
+                    logMessage(`Video inputs changed: ${freshVideoInputDeviceList.length} devices`);
+                },
+                audioOutputsChanged: (freshAudioOutputDeviceList) => {
+                    logMessage(`Audio outputs changed: ${freshAudioOutputDeviceList.length} devices`);
+                }
+            };
+            
+            // Add observers
+            audioVideo.addObserver(audioVideoObserver);
+            audioVideo.addVideoTileObserver(videoTileObserver);
+            audioVideo.addDeviceChangeObserver(deviceChangeObserver);
+        }
+        
+        async function startMeeting() {
+            try {
+                logMessage('Starting meeting...');
+                
+                // Start audio/video
+                await audioVideo.start();
+                logMessage('Audio/Video started');
+                
+                // Start local video
+                await audioVideo.startLocalVideoTile();
+                logMessage('Local video tile started');
+                
+                // Enable controls
+                joinBtn.disabled = true;
+                leaveBtn.disabled = false;
+                toggleVideoBtn.disabled = false;
+                toggleAudioBtn.disabled = false;
+                
+                updateStatus('Meeting active - video should be working!', 'success');
+                
+            } catch (error) {
+                logMessage(`Error starting meeting: ${error.message}`);
+                updateStatus(`Error starting meeting: ${error.message}`, 'error');
+            }
+        }
+        
+        async function leaveMeeting() {
+            try {
+                logMessage('Leaving meeting...');
+                
+                if (audioVideo) {
+                    audioVideo.stop();
+                }
+                
+                // Reset state
+                meetingSession = null;
+                audioVideo = null;
+                
+                // Reset UI
+                joinBtn.disabled = false;
+                leaveBtn.disabled = true;
+                toggleVideoBtn.disabled = true;
+                toggleAudioBtn.disabled = true;
+                
+                // Clear videos
+                localVideo.srcObject = null;
+                remoteVideo.srcObject = null;
+                
+                updateStatus('Left meeting', 'info');
+                logMessage('Successfully left meeting');
+                
+            } catch (error) {
+                logMessage(`Error leaving meeting: ${error.message}`);
+                updateStatus(`Error leaving meeting: ${error.message}`, 'error');
+            }
+        }
+        
+        async function toggleVideo() {
+            try {
+                if (!audioVideo) return;
+                
+                if (isVideoEnabled) {
+                    await audioVideo.stopLocalVideoTile();
+                    isVideoEnabled = false;
+                    toggleVideoBtn.textContent = 'Enable Video';
+                    logMessage('Video disabled');
+                } else {
+                    await audioVideo.startLocalVideoTile();
+                    isVideoEnabled = true;
+                    toggleVideoBtn.textContent = 'Disable Video';
+                    logMessage('Video enabled');
+                }
+            } catch (error) {
+                logMessage(`Error toggling video: ${error.message}`);
+            }
+        }
+        
+        async function toggleAudio() {
+            try {
+                if (!audioVideo) return;
+                
+                if (isAudioEnabled) {
+                    await audioVideo.realtimeMuteLocalAudio();
+                    isAudioEnabled = false;
+                    toggleAudioBtn.textContent = 'Enable Audio';
+                    logMessage('Audio muted');
+                } else {
+                    await audioVideo.realtimeUnmuteLocalAudio();
+                    isAudioEnabled = true;
+                    toggleAudioBtn.textContent = 'Disable Audio';
+                    logMessage('Audio unmuted');
+                }
+            } catch (error) {
+                logMessage(`Error toggling audio: ${error.message}`);
+            }
+        }
+        
+        // Initialize
+        logMessage('Chime SDK Serverless Test Page Loaded - Version 2');
+        logMessage(`API Base URL: ${API_BASE_URL}`);
+        logMessage(`Page loaded at: ${new Date().toISOString()}`);
+    </script>
+</body>
+</html>

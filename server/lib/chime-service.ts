@@ -4,22 +4,53 @@ import {
   CreateAttendeeCommand,
   DeleteMeetingCommand,
   DeleteAttendeeCommand,
+  GetMeetingCommand,
 } from "@aws-sdk/client-chime-sdk-meetings";
 import { ChimeMeetingResponse, ChimeAttendeeResponse } from "@shared/api";
 
 export class ChimeService {
   private client: ChimeSDKMeetingsClient | null = null;
-  private credentials: {
-    region: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-  } | null = null;
 
   constructor() {
     // Environment-aware configuration
     const isProduction = process.env.NODE_ENV === "production";
     const isPreview = process.env.VERCEL_ENV === "preview";
     const isDevelopment = !isProduction && !isPreview;
+
+    // Debug logging
+    console.log(
+      "ChimeService Environment:",
+      isProduction ? "Production" : isPreview ? "Preview" : "Development",
+    );
+    console.log("AWS Region:", process.env.AWS_REGION);
+    console.log("AWS Access Key ID:", process.env.AWS_ACCESS_KEY_ID ? "Set" : "Not set");
+    console.log(
+      "AWS Secret Access Key:",
+      process.env.AWS_SECRET_ACCESS_KEY ? "Set" : "Not set",
+    );
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+    console.log("VERCEL_ENV:", process.env.VERCEL_ENV);
+    console.log("Raw AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID ? "Present" : "Missing");
+    console.log("Raw AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY ? "Present" : "Missing");
+    console.log("awsAccessKeyId value:", process.env.AWS_ACCESS_KEY_ID ? `${process.env.AWS_ACCESS_KEY_ID.substring(0, 8)}...` : "undefined");
+    console.log("awsSecretAccessKey value:", process.env.AWS_SECRET_ACCESS_KEY ? `${process.env.AWS_SECRET_ACCESS_KEY.substring(0, 8)}...` : "undefined");
+    console.log("awsAccessKeyId length:", process.env.AWS_ACCESS_KEY_ID?.length || 0);
+    console.log("awsSecretAccessKey length:", process.env.AWS_SECRET_ACCESS_KEY?.length || 0);
+
+    // Check if credentials are available
+    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+      console.log("ChimeService: AWS credentials configured successfully");
+    } else {
+      console.warn(
+        "ChimeService: AWS credentials not configured. Chime SDK features will not be available.",
+      );
+    }
+  }
+
+  private getCredentials() {
+    // Environment-aware configuration
+    const isProduction = process.env.NODE_ENV === "production";
+    const isPreview = process.env.VERCEL_ENV === "preview";
 
     // Select environment variables based on deployment environment
     const awsRegion = isProduction
@@ -35,35 +66,18 @@ export class ChimeService {
       : process.env.AWS_SECRET_ACCESS_KEY_PREVIEW ||
         process.env.AWS_SECRET_ACCESS_KEY;
 
-    // Debug logging
-    console.log(
-      "ChimeService Environment:",
-      isProduction ? "Production" : isPreview ? "Preview" : "Development",
-    );
-    console.log("AWS Region:", awsRegion);
-    console.log("AWS Access Key ID:", awsAccessKeyId ? "Set" : "Not set");
-    console.log(
-      "AWS Secret Access Key:",
-      awsSecretAccessKey ? "Set" : "Not set",
-    );
-
-    // In development, credentials are optional - we'll check them when actually needed
-    if (isDevelopment && (!awsAccessKeyId || !awsSecretAccessKey)) {
-      console.warn(
-        "AWS credentials not configured for development. Chime SDK features will not be available.",
-      );
-      return;
-    }
-
-    // In production/preview, credentials are required
     if (!awsAccessKeyId || !awsSecretAccessKey) {
+      console.error("ChimeService: No AWS credentials available");
+      console.error("Available environment variables:");
+      console.error("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID ? "Present" : "Missing");
+      console.error("AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY ? "Present" : "Missing");
+      console.error("AWS_REGION:", process.env.AWS_REGION || "Not set");
       throw new Error(
         "AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
       );
     }
 
-    // Store credentials for lazy initialization
-    this.credentials = {
+    return {
       region: awsRegion || "us-east-1",
       accessKeyId: awsAccessKeyId,
       secretAccessKey: awsSecretAccessKey,
@@ -71,18 +85,13 @@ export class ChimeService {
   }
 
   private ensureClient(): ChimeSDKMeetingsClient {
-    if (!this.credentials) {
-      throw new Error(
-        "AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
-      );
-    }
-
     if (!this.client) {
+      const credentials = this.getCredentials();
       this.client = new ChimeSDKMeetingsClient({
-        region: this.credentials.region,
+        region: credentials.region,
         credentials: {
-          accessKeyId: this.credentials.accessKeyId,
-          secretAccessKey: this.credentials.secretAccessKey,
+          accessKeyId: credentials.accessKeyId,
+          secretAccessKey: credentials.secretAccessKey,
         },
       });
     }
@@ -135,6 +144,29 @@ export class ChimeService {
       }
 
       throw new Error("Failed to create Chime meeting");
+    }
+  }
+
+  /**
+   * Get meeting details from Chime
+   */
+  async getMeeting(meetingId: string): Promise<ChimeMeetingResponse> {
+    try {
+      console.log("Getting Chime meeting:", meetingId);
+
+      const client = this.ensureClient();
+      
+      const command = new GetMeetingCommand({
+        MeetingId: meetingId,
+      });
+
+      const response = await client.send(command);
+      console.log("Chime meeting retrieved successfully:", response.Meeting?.MeetingId);
+      
+      return response as ChimeMeetingResponse;
+    } catch (error) {
+      console.error("Error getting Chime meeting:", error);
+      throw new Error("Failed to get Chime meeting");
     }
   }
 

@@ -138,9 +138,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- RLS Policies for tenants table
-CREATE POLICY "Tenants are viewable by users in the same tenant" ON tenants
-    FOR SELECT USING (id = get_user_tenant_id());
+-- More permissive RLS Policies for tenants table
+CREATE POLICY "Tenants are viewable by authenticated users" ON tenants
+    FOR SELECT USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Tenants can be created by authenticated users" ON tenants
     FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
@@ -151,12 +151,21 @@ CREATE POLICY "Tenants can be updated by admins in the same tenant" ON tenants
 CREATE POLICY "Tenants can be deleted by admins in the same tenant" ON tenants
     FOR DELETE USING (id = get_user_tenant_id() AND is_user_admin());
 
--- RLS Policies for users table
-CREATE POLICY "Users are viewable by users in the same tenant" ON users
+-- More permissive RLS Policies for users table
+CREATE POLICY "Users can view their own record" ON users
+    FOR SELECT USING (id = auth.uid());
+
+CREATE POLICY "Users can view users in the same tenant" ON users
     FOR SELECT USING (tenant_id = get_user_tenant_id());
+
+CREATE POLICY "Users can create their own record" ON users
+    FOR INSERT WITH CHECK (id = auth.uid());
 
 CREATE POLICY "Users can be created by admins in the same tenant" ON users
     FOR INSERT WITH CHECK (tenant_id = get_user_tenant_id() AND is_user_admin());
+
+CREATE POLICY "Users can update their own record" ON users
+    FOR UPDATE USING (id = auth.uid());
 
 CREATE POLICY "Users can be updated by admins in the same tenant" ON users
     FOR UPDATE USING (tenant_id = get_user_tenant_id() AND is_user_admin());

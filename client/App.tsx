@@ -16,6 +16,10 @@ import Meeting from "./pages/Meeting";
 import Dashboard from "./pages/Dashboard";
 import ImprovedDashboard from "./pages/ImprovedDashboard";
 import EnhancedMeeting from "./pages/EnhancedMeeting";
+import StartMeetingPage from "./pages/StartMeetingPage";
+import MediaTest from "./pages/MediaTest";
+import ParticipantListDemo from "./components/meetings/ParticipantListDemo";
+import EnhancedMeetingDemo from "./pages/EnhancedMeetingDemo";
 import NotFound from "./pages/NotFound";
 
 import "./global.css";
@@ -70,6 +74,17 @@ function AppRoutes() {
         <Route path="/join-options" element={<JoinOptions />} />
         <Route path="/meeting" element={<Meeting />} />
         <Route path="/enhanced-meeting" element={<EnhancedMeeting />} />
+        <Route
+          path="/start-meeting"
+          element={
+            <ProtectedRoute>
+              <StartMeetingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/media-test" element={<MediaTest />} />
+        <Route path="/participant-demo" element={<ParticipantListDemo />} />
+        <Route path="/enhanced-meeting-demo" element={<EnhancedMeetingDemo />} />
         <Route
           path="/dashboard"
 

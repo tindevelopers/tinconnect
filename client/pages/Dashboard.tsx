@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Separator } from '../components/ui/separator';
 import { MeetingDashboard } from '../components/meetings/MeetingDashboard';
 import { VideoMeeting } from '../components/video/VideoMeeting';
-import { Plus, Users, Building, LogOut, User } from 'lucide-react';
+import { Plus, Users, Building, LogOut, User, Video } from 'lucide-react';
 import { Tenant, User as UserProfile, Meeting } from '../../server/lib/database.types';
 import { CreateTenantRequest, CreateUserRequest } from '@shared/api';
 
@@ -161,10 +161,22 @@ export default function Dashboard() {
 
           <TabsContent value="meetings" className="space-y-6">
             {currentTenant && (
-              <MeetingDashboard
-                tenantId={currentTenant.id}
-                onJoinMeeting={handleJoinMeeting}
-              />
+              <>
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold text-gray-900">Meetings</h2>
+                  <a
+                    href="/start-meeting"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
+                  >
+                    <Video className="w-4 h-4 mr-2" />
+                    Start Meeting
+                  </a>
+                </div>
+                <MeetingDashboard
+                  tenantId={currentTenant.id}
+                  onJoinMeeting={handleJoinMeeting}
+                />
+              </>
             )}
           </TabsContent>
 
