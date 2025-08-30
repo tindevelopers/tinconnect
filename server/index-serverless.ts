@@ -1,22 +1,22 @@
 import express from 'express';
 import { config } from 'dotenv';
 import cors from 'cors';
-import path from "path";
 import { handlePing } from './routes/ping.js';
 import { handleDemo } from './routes/demo.js';
 import { getTenant, getUsers } from './routes/tenants.js';
 
 // Load environment variables
-config(); // Load .env files
+config({ path: '.env.local' }); // Load local environment variables first
+config(); // Then load any other .env files
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8081; // Use port 8081 to avoid conflict with Vite
 
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://tinconnect.com', 'https://www.tinconnect.com', 'https://develop.tinconnect.com']
-    : ['http://localhost:3000', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'http://localhost:8083'],
+    : ['http://localhost:3000', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'http://localhost:8083', 'https://develop.tinconnect.com'],
   credentials: true
 }));
 
@@ -28,7 +28,7 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'production',
+    environment: process.env.NODE_ENV || 'development',
     serverless: 'Meeting functionality moved to AWS Lambda'
   });
 });
@@ -50,38 +50,26 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// In production, serve the built SPA files
-const __dirname = import.meta.dirname;
-const distPath = path.join(__dirname, "../spa");
+// Serve static files and handle SPA routing in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('dist/spa'));
+  
+  // Handle SPA routing - serve index.html for all non-API routes
+  app.get('*', (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({ error: 'API route not found' });
+    }
+    
+    // Serve index.html for all other routes (SPA routing)
+    res.sendFile('dist/spa/index.html', { root: '.' });
+  });
+}
 
-// Serve static files
-app.use(express.static(distPath));
-
-// Handle React Router - serve index.html for all non-API routes
-app.get("*", (req, res) => {
-  // Don't serve index.html for API routes
-  if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
-    return res.status(404).json({ error: "API endpoint not found" });
-  }
-
-  res.sendFile(path.join(distPath, "index.html"));
-});
-
-app.listen(port, () => {
-  console.log(`🚀 Serverless-ready server running on port ${port}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'production'}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Serverless-ready server running on port ${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔧 Meeting functionality: AWS Lambda (serverless)`);
   console.log(`🌐 CORS origins: ${process.env.NODE_ENV === 'production' ? 'Production domains' : 'Localhost'}`);
-  console.log(`📝 Health check: http://localhost:${port}/health`);
-});
-
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("🛑 Received SIGTERM, shutting down gracefully");
-  process.exit(0);
-});
-
-process.on("SIGINT", () => {
-  console.log("🛑 Received SIGINT, shutting down gracefully");
-  process.exit(0);
+  console.log(`📝 Health check: http://localhost:${PORT}/health`);
 });

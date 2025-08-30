@@ -23,6 +23,12 @@ export default defineConfig(({ mode }) => ({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    include: ['amazon-chime-sdk-js'],
+  },
 }));
 
 function expressPlugin(): Plugin {
