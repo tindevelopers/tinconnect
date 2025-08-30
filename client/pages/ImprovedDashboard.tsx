@@ -153,7 +153,7 @@ export default function ImprovedDashboard() {
             </div>
 
             <h1 className="text-3xl font-medium text-blue-600 mb-2">
-              {userProfile?.name || 'Erica James'}
+              {userProfile?.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
             </h1>
             
             <div className="flex items-center space-x-2">
