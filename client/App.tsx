@@ -13,6 +13,8 @@ import JoinMeeting from "./pages/JoinMeeting";
 import JoinOptions from "./pages/JoinOptions";
 import Meeting from "./pages/Meeting";
 import Dashboard from "./pages/Dashboard";
+import ImprovedDashboard from "./pages/ImprovedDashboard";
+import EnhancedMeeting from "./pages/EnhancedMeeting";
 import NotFound from "./pages/NotFound";
 import "./global.css";
 
