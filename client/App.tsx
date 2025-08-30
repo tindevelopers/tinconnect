@@ -51,14 +51,18 @@ function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="/auth" element={<Auth />} />
-        <Route 
-          path="/dashboard" 
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/join-meeting" element={<JoinMeeting />} />
+        <Route path="/join-options" element={<JoinOptions />} />
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
