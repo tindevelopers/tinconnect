@@ -117,9 +117,9 @@ export default function ImprovedDashboard() {
       <div className="flex-1 bg-gray-50 p-4 lg:p-6">
         <div className="max-w-6xl mx-auto">
           {/* User Profile Section */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-6 lg:mb-8">
             <div className="relative mb-4">
-              <Avatar className="w-60 h-60 rounded-2xl">
+              <Avatar className="w-40 h-40 lg:w-60 lg:h-60 rounded-2xl">
                 <AvatarImage 
                   src={userProfile?.avatar_url || '/api/placeholder/240/240'} 
                   alt={userProfile?.name || 'User'} 
