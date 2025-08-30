@@ -37,22 +37,33 @@ export default function ImprovedDashboard() {
   const { user, userProfile, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('home');
+  const [dashboardTimeout, setDashboardTimeout] = useState(false);
 
-  // Show loading state while auth is being determined
-  if (loading) {
+  // Add a timeout for dashboard loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDashboardTimeout(true);
+    }, 3000); // 3 second timeout
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loading state while auth is being determined (with timeout)
+  if (loading && !dashboardTimeout) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h1 className="text-2xl font-bold text-blue-600 mb-2">TIN Connect</h1>
           <p className="text-gray-500">Loading dashboard...</p>
+          <p className="text-xs text-gray-400 mt-2">Taking longer than expected? <button onClick={() => navigate('/auth')} className="text-blue-600 underline">Try signing in</button></p>
         </div>
       </div>
     );
   }
 
-  // If no user, redirect to auth (shouldn't happen with ProtectedRoute, but safety check)
-  if (!user) {
+  // If loading timed out or no user, redirect to auth
+  if (!user || (loading && dashboardTimeout)) {
     navigate('/auth');
     return null;
   }
