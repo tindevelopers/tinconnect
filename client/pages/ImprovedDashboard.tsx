@@ -66,9 +66,9 @@ export default function ImprovedDashboard() {
     // Create a new meeting session
     const newMeeting = {
       meetingId: Math.random().toString(36).substr(2, 6).toUpperCase(),
-      userName: userProfile?.name || user?.email || 'User'
+      userName: userProfile?.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'
     };
-    
+
     sessionStorage.setItem('pendingMeeting', JSON.stringify(newMeeting));
     navigate('/enhanced-meeting', { state: newMeeting });
   };
