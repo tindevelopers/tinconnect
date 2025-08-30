@@ -12,7 +12,7 @@ import {
   MicOff,
   Share,
   Monitor,
-  Record,
+  Circle,
   Square,
   Maximize2,
   Minimize2
@@ -170,7 +170,7 @@ const EnhancedMeetingInterface: React.FC<EnhancedMeetingInterfaceProps> = ({
                     : "bg-gray-700 text-white hover:bg-gray-600"
                 )}
               >
-                {isRecording ? <Square className="w-4 h-4" /> : <Record className="w-4 h-4" />}
+                {isRecording ? <Square className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
               </Button>
             )}
             
