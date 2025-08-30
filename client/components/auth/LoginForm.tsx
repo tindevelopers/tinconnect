@@ -27,10 +27,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignU
 
     try {
       const { error } = await signIn(email, password);
-      
+
       if (error) {
         setError(error.message);
       } else {
+        // Redirect to dashboard after successful sign in
         onSuccess?.();
       }
     } catch (err) {
