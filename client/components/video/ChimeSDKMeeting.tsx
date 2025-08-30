@@ -6,6 +6,7 @@ import {
   VideoTileState,
   MeetingSessionConfiguration,
   DefaultDeviceController,
+  DefaultMeetingSession,
   LogLevel,
   ConsoleLogger,
   MeetingSessionStatus,
