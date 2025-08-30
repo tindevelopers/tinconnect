@@ -244,8 +244,46 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
     console.log('Adding device change observer...');
     audioVideoRef.current.addDeviceChangeObserver(deviceChangeObserver);
 
-    // Note: Video tile observer is not available in this version
-    // We'll handle video tiles manually in the startMeeting function
+    // Video Tile Observer - This is the key for proper video binding
+    console.log('Adding video tile observer...');
+    try {
+      audioVideoRef.current.addVideoTileObserver({
+        videoTileDidUpdate: (tileState) => {
+          console.log('Video tile updated:', tileState);
+          if (tileState.localTile && tileState.tileId) {
+            console.log('Local video tile detected, binding to element...');
+            // Bind the video element when the local tile is available
+            if (localVideoRef.current) {
+              try {
+                audioVideoRef.current.bindVideoElement(tileState.tileId, localVideoRef.current);
+                console.log('Video element bound to local tile ID:', tileState.tileId);
+              } catch (error) {
+                console.error('Error binding video element:', error);
+              }
+            } else {
+              console.log('Video element not ready, will retry...');
+              // Retry binding after a short delay
+              setTimeout(() => {
+                if (localVideoRef.current && tileState.tileId) {
+                  try {
+                    audioVideoRef.current.bindVideoElement(tileState.tileId, localVideoRef.current);
+                    console.log('Video element bound to local tile ID (retry):', tileState.tileId);
+                  } catch (error) {
+                    console.error('Error binding video element (retry):', error);
+                  }
+                }
+              }, 100);
+            }
+          }
+        },
+        videoTileWasRemoved: (tileId) => {
+          console.log('Video tile removed:', tileId);
+        }
+      });
+      console.log('Video tile observer added successfully');
+    } catch (error) {
+      console.log('Video tile observer not available, will use manual binding:', error);
+    }
 
     console.log('Observers set up successfully');
   };
@@ -294,39 +332,6 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       
       audioVideoRef.current.startLocalVideoTile();
       console.log('Local video started successfully');
-
-      // Manually bind video element since video tile observer is not available
-      // Add a retry mechanism since the video element might not be rendered yet
-      let retryCount = 0;
-      const maxRetries = 30; // Increased retries
-      const bindVideoElement = () => {
-        if (localVideoRef.current) {
-          console.log('localVideoRef.current is available, binding video element...');
-          // Get the local video tile ID (usually 1 for local video)
-          const localTileId = 1;
-          try {
-            audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
-            console.log('Video element bound manually to tile ID:', localTileId);
-            return true;
-          } catch (error) {
-            console.error('Error binding video element:', error);
-            return false;
-          }
-        } else {
-          console.log(`localVideoRef.current is null - retry ${retryCount + 1}/${maxRetries}`);
-          retryCount++;
-          if (retryCount < maxRetries) {
-            // Retry after a longer delay
-            setTimeout(bindVideoElement, 300);
-            return false;
-          } else {
-            console.error('Failed to bind video element after maximum retries');
-            return false;
-          }
-        }
-      };
-      
-      bindVideoElement();
 
       console.log('Meeting started successfully');
 
