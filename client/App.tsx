@@ -78,11 +78,7 @@ function AppRoutes() {
         />
         <Route
           path="/improved-dashboard"
-          element={
-            <ProtectedRoute>
-              <ImprovedDashboard />
-            </ProtectedRoute>
-          }
+          element={<ImprovedDashboard />}
         />
         {/* Redirect capitalized versions to correct routes */}
         <Route path="/ImprovedDashboard" element={<Navigate to="/improved-dashboard" replace />} />
