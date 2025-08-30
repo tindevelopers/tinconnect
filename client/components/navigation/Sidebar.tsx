@@ -70,10 +70,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <div className={cn(
-      "w-80 bg-white shadow-lg border-r border-gray-200 h-full relative",
+      "w-80 bg-white shadow-lg border-r border-gray-200 h-full relative pt-[3px]",
       className
     )}>
-      <div className="p-6">
+      <div className="p-6 flex flex-col justify-start items-center">
         <div className="space-y-1">
           {navigationItems.map((item) => {
             const Icon = item.icon;

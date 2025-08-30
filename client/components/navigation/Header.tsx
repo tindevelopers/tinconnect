@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
       "bg-white shadow-sm border-b border-gray-200 h-18",
       className
     )}>
-      <div className="flex items-center justify-between h-full px-6">
+      <div className="flex items-center justify-between h-full px-6 min-h-[100px]">
         {/* Logo and Branding */}
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-3">
