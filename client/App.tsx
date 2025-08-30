@@ -18,6 +18,7 @@ import ImprovedDashboard from "./pages/ImprovedDashboard";
 import EnhancedMeeting from "./pages/EnhancedMeeting";
 import StartMeetingPage from "./pages/StartMeetingPage";
 import MediaTest from "./pages/MediaTest";
+import ParticipantListDemo from "./components/meetings/ParticipantListDemo";
 import NotFound from "./pages/NotFound";
 
 import "./global.css";
@@ -81,6 +82,7 @@ function AppRoutes() {
           }
         />
         <Route path="/media-test" element={<MediaTest />} />
+        <Route path="/participant-demo" element={<ParticipantListDemo />} />
         <Route
           path="/dashboard"
 
