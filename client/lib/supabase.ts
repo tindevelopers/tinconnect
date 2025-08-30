@@ -79,6 +79,29 @@ export const signUp = async (
       },
     });
 
+    // If signup is successful, create the user record in the users table
+    if (data.user && !error) {
+      try {
+        const { error: userError } = await supabase
+          .from("users")
+          .insert({
+            id: data.user.id,
+            tenant_id: userData.tenant_id,
+            email: email,
+            name: userData.name,
+            role: "user"
+          });
+
+        if (userError) {
+          console.error("Error creating user record:", userError);
+          // Don't fail the signup, just log the error
+        }
+      } catch (userError) {
+        console.error("Error creating user record:", userError);
+        // Don't fail the signup, just log the error
+      }
+    }
+
     return { data, error };
   } catch (error) {
     console.error("SignUp error:", error);
@@ -146,23 +169,112 @@ export const getUserContext = async (userId: string) => {
   if (!checkEnvVars()) {
     return { data: null, error: { message: "Supabase not configured" } };
   }
-  const { data, error } = await supabase
-    .from("users")
-    .select(
-      `
-      *,
-      tenants (
-        id,
-        name,
-        domain,
-        settings
-      )
-    `,
-    )
-    .eq("id", userId)
-    .single();
 
-  return { data, error };
+  try {
+    // First, try to get the user from the users table
+    const { data, error } = await supabase
+      .from("users")
+      .select(
+        `
+        *,
+        tenants (
+          id,
+          name,
+          domain,
+          settings
+        )
+      `,
+      )
+      .eq("id", userId)
+      .single();
+
+    // If user doesn't exist in users table, create them
+    if (error && error.code === 'PGRST116') {
+      console.log("User not found in users table, attempting to create user record...");
+      
+      // Get the current user from auth
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Create a default tenant first (if needed)
+        const { data: tenantData, error: tenantError } = await supabase
+          .from("tenants")
+          .select("id")
+          .limit(1)
+          .single();
+
+        let tenantId = "00000000-0000-0000-0000-000000000000"; // Default tenant ID
+        
+        if (tenantError && tenantError.code === 'PGRST116') {
+          // No tenants exist, create a default one
+          const { data: newTenant, error: createTenantError } = await supabase
+            .from("tenants")
+            .insert({
+              name: "Default Organization",
+              domain: "default.local",
+              settings: {
+                maxParticipants: 50,
+                recordingEnabled: true,
+                chatEnabled: true,
+                screenShareEnabled: true
+              }
+            })
+            .select("id")
+            .single();
+
+          if (createTenantError) {
+            console.error("Error creating default tenant:", createTenantError);
+            return { data: null, error: createTenantError };
+          }
+          
+          tenantId = newTenant.id;
+        } else if (tenantData) {
+          tenantId = tenantData.id;
+        }
+
+        // Create user record
+        const { data: newUser, error: createUserError } = await supabase
+          .from("users")
+          .insert({
+            id: user.id,
+            tenant_id: tenantId,
+            email: user.email || "",
+            name: user.user_metadata?.name || user.email?.split('@')[0] || "User",
+            role: "user"
+          })
+          .select(
+            `
+            *,
+            tenants (
+              id,
+              name,
+              domain,
+              settings
+            )
+          `
+          )
+          .single();
+
+        if (createUserError) {
+          console.error("Error creating user record:", createUserError);
+          return { data: null, error: createUserError };
+        }
+
+        console.log("User record created successfully:", newUser);
+        return { data: newUser, error: null };
+      }
+    }
+
+    if (error) {
+      console.error("Error getting user context:", error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error in getUserContext:", error);
+    return { data: null, error: { message: "Failed to get user context" } };
+  }
 };
 
 // Real-time subscriptions
