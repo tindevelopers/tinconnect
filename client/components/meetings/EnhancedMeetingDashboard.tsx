@@ -60,7 +60,9 @@ export const EnhancedMeetingDashboard: React.FC<
         console.log("Meetings fetched successfully:", data);
         setMeetings(data.data || []);
       } else {
-        console.error(`Failed to fetch meetings: ${response.status} ${response.statusText}`);
+        console.error(
+          `Failed to fetch meetings: ${response.status} ${response.statusText}`,
+        );
         const errorData = await response.text();
         console.error("Error response:", errorData);
       }
@@ -103,7 +105,10 @@ export const EnhancedMeetingDashboard: React.FC<
         setShowCreateForm(false);
       } else {
         const errorData = await response.text();
-        console.error(`Failed to create meeting: ${response.status}`, errorData);
+        console.error(
+          `Failed to create meeting: ${response.status}`,
+          errorData,
+        );
       }
     } catch (error) {
       console.error("Error creating meeting:", error);

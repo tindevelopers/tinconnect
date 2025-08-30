@@ -108,7 +108,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserProfile(data.user);
         setTenant(data.tenant);
       } else {
-        console.log("No user data returned, this shouldn't happen with the new fallback system");
+        console.log(
+          "No user data returned, this shouldn't happen with the new fallback system",
+        );
       }
 
       if (data) {

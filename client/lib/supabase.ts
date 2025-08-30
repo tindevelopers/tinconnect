@@ -19,16 +19,37 @@ const supabaseAnonKey = isProduction
 
 // Debug logging
 console.log("=== Supabase Configuration Debug ===");
-console.log("Environment:", isProduction ? "Production" : isPreview ? "Preview" : isDevelopment ? "Development" : "Unknown");
+console.log(
+  "Environment:",
+  isProduction
+    ? "Production"
+    : isPreview
+      ? "Preview"
+      : isDevelopment
+        ? "Development"
+        : "Unknown",
+);
 console.log("VITE_VERCEL_ENV:", import.meta.env.VITE_VERCEL_ENV);
 console.log("PROD:", import.meta.env.PROD);
 console.log("DEV:", import.meta.env.DEV);
 console.log("Supabase URL:", supabaseUrl ? "Set" : "Not set");
 console.log("Supabase Anon Key:", supabaseAnonKey ? "Set" : "Not set");
-console.log("URL Preview:", import.meta.env.VITE_SUPABASE_URL_PREVIEW ? "Set" : "Not set");
-console.log("Key Preview:", import.meta.env.VITE_SUPABASE_ANON_KEY_PREVIEW ? "Set" : "Not set");
-console.log("URL Production:", import.meta.env.VITE_SUPABASE_URL ? "Set" : "Not set");
-console.log("Key Production:", import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not set");
+console.log(
+  "URL Preview:",
+  import.meta.env.VITE_SUPABASE_URL_PREVIEW ? "Set" : "Not set",
+);
+console.log(
+  "Key Preview:",
+  import.meta.env.VITE_SUPABASE_ANON_KEY_PREVIEW ? "Set" : "Not set",
+);
+console.log(
+  "URL Production:",
+  import.meta.env.VITE_SUPABASE_URL ? "Set" : "Not set",
+);
+console.log(
+  "Key Production:",
+  import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not set",
+);
 console.log("=====================================");
 
 // Only check for environment variables at runtime, not during build
@@ -67,7 +88,7 @@ export const getStoredSession = () => {
       return parsed.currentSession || null;
     }
   } catch (error) {
-    console.warn('Error reading stored session:', error);
+    console.warn("Error reading stored session:", error);
   }
   return null;
 };
@@ -77,7 +98,7 @@ export const clearStoredSession = () => {
     const sessionKey = `sb-${supabaseAnonKey}-auth-token`;
     localStorage.removeItem(sessionKey);
   } catch (error) {
-    console.warn('Error clearing stored session:', error);
+    console.warn("Error clearing stored session:", error);
   }
 };
 
@@ -115,15 +136,13 @@ export const signUp = async (
 
         if (!existingUser) {
           // Only insert if user doesn't exist
-          const { error: userError } = await supabase
-            .from("users")
-            .insert({
-              id: data.user.id,
-              tenant_id: userData.tenant_id,
-              email: email,
-              name: userData.name,
-              role: "user"
-            });
+          const { error: userError } = await supabase.from("users").insert({
+            id: data.user.id,
+            tenant_id: userData.tenant_id,
+            email: email,
+            name: userData.name,
+            role: "user",
+          });
 
           if (userError) {
             console.error("Error creating user record:", userError);
@@ -169,18 +188,18 @@ export const signOut = async () => {
 
   try {
     console.log("signOut: Starting sign out process...");
-    
+
     // Clear any stored session data
     clearStoredSession();
-    
+
     // Sign out from Supabase
     const { error } = await supabase.auth.signOut();
-    
+
     if (error) {
       console.error("signOut: Supabase sign out error:", error);
       return { error };
     }
-    
+
     console.log("signOut: Successfully signed out");
     return { error: null };
   } catch (error) {
@@ -219,33 +238,35 @@ export const getUserContext = async (userId: string) => {
 
   // Create demo data that will be returned on any failure
   const createDemoData = () => {
-    const demoTenantId = '00000000-0000-0000-0000-000000000001';
+    const demoTenantId = "00000000-0000-0000-0000-000000000001";
     return {
       user: {
         id: userId,
         auth_user_id: userId,
-        name: 'Demo User',
-        email: 'demo@example.com',
-        role: 'user' as const,
+        name: "Demo User",
+        email: "demo@example.com",
+        role: "user" as const,
         tenant_id: demoTenantId,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        avatar_url: null
+        avatar_url: null,
       },
       tenant: {
         id: demoTenantId,
-        name: 'Demo Organization',
-        domain: 'demo.local',
+        name: "Demo Organization",
+        domain: "demo.local",
         settings: {},
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
+        updated_at: new Date().toISOString(),
+      },
     };
   };
 
   // If Supabase isn't configured, return demo data immediately
   if (!checkEnvVars()) {
-    console.log("getUserContext: Environment variables check failed, using demo data");
+    console.log(
+      "getUserContext: Environment variables check failed, using demo data",
+    );
     return { data: createDemoData(), error: null };
   }
 
@@ -270,10 +291,13 @@ export const getUserContext = async (userId: string) => {
       .single();
 
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout')), 3000); // 3 second timeout
+      setTimeout(() => reject(new Error("Database query timeout")), 3000); // 3 second timeout
     });
 
-    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    const { data, error } = (await Promise.race([
+      queryPromise,
+      timeoutPromise,
+    ])) as any;
     console.log("getUserContext: Query completed with:", { data, error });
 
     // If we got real data, return it
@@ -282,12 +306,16 @@ export const getUserContext = async (userId: string) => {
     }
 
     // If user doesn't exist in users table, create them
-    if (error && error.code === 'PGRST116') {
-      console.log("getUserContext: User not found in users table, attempting to create user record...");
-      
+    if (error && error.code === "PGRST116") {
+      console.log(
+        "getUserContext: User not found in users table, attempting to create user record...",
+      );
+
       // Get the current user from auth
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (user) {
         // Create a default tenant first (if needed)
         const { data: tenantData, error: tenantError } = await supabase
@@ -297,8 +325,8 @@ export const getUserContext = async (userId: string) => {
           .single();
 
         let tenantId = "00000000-0000-0000-0000-000000000000"; // Default tenant ID
-        
-        if (tenantError && tenantError.code === 'PGRST116') {
+
+        if (tenantError && tenantError.code === "PGRST116") {
           // No tenants exist, create a default one
           const { data: newTenant, error: createTenantError } = await supabase
             .from("tenants")
@@ -309,8 +337,8 @@ export const getUserContext = async (userId: string) => {
                 maxParticipants: 50,
                 recordingEnabled: true,
                 chatEnabled: true,
-                screenShareEnabled: true
-              }
+                screenShareEnabled: true,
+              },
             })
             .select("id")
             .single();
@@ -319,7 +347,7 @@ export const getUserContext = async (userId: string) => {
             console.error("Error creating default tenant:", createTenantError);
             return { data: null, error: createTenantError };
           }
-          
+
           tenantId = newTenant.id;
         } else if (tenantData) {
           tenantId = tenantData.id;
@@ -331,13 +359,16 @@ export const getUserContext = async (userId: string) => {
           .select("id")
           .eq("id", user.id)
           .single();
-        
+
         if (existingUser) {
-          console.log("getUserContext: User already exists, fetching complete record...");
+          console.log(
+            "getUserContext: User already exists, fetching complete record...",
+          );
           // User exists, fetch the complete record
           const { data: completeUser, error: fetchError } = await supabase
             .from("users")
-            .select(`
+            .select(
+              `
               *,
               tenants (
                 id,
@@ -345,18 +376,19 @@ export const getUserContext = async (userId: string) => {
                 domain,
                 settings
               )
-            `)
+            `,
+            )
             .eq("id", user.id)
             .single();
-          
+
           if (fetchError) {
             console.error("Error fetching existing user:", fetchError);
             return { data: null, error: fetchError };
           }
-          
+
           return { data: completeUser, error: null };
         }
-        
+
         // Create user record only if it doesn't exist
         const { data: newUser, error: createUserError } = await supabase
           .from("users")
@@ -364,8 +396,9 @@ export const getUserContext = async (userId: string) => {
             id: user.id,
             tenant_id: tenantId,
             email: user.email || "",
-            name: user.user_metadata?.name || user.email?.split('@')[0] || "User",
-            role: "user"
+            name:
+              user.user_metadata?.name || user.email?.split("@")[0] || "User",
+            role: "user",
           })
           .select(
             `
@@ -376,7 +409,7 @@ export const getUserContext = async (userId: string) => {
               domain,
               settings
             )
-          `
+          `,
           )
           .single();
 
@@ -392,10 +425,15 @@ export const getUserContext = async (userId: string) => {
 
     if (error) {
       console.error("getUserContext: Error getting user context:", error);
-      
+
       // If it's a timeout or connection error, try to create a basic user context
-      if (error.message?.includes('timeout') || error.message?.includes('network')) {
-        console.log("getUserContext: Database timeout/error, creating fallback user context...");
+      if (
+        error.message?.includes("timeout") ||
+        error.message?.includes("network")
+      ) {
+        console.log(
+          "getUserContext: Database timeout/error, creating fallback user context...",
+        );
         return {
           data: {
             id: userId,
@@ -411,16 +449,18 @@ export const getUserContext = async (userId: string) => {
                 maxParticipants: 50,
                 recordingEnabled: true,
                 chatEnabled: true,
-                screenShareEnabled: true
-              }
-            }
+                screenShareEnabled: true,
+              },
+            },
           },
-          error: null
+          error: null,
         };
       }
-      
+
       // For any other error, also provide fallback
-      console.log("getUserContext: Other error, providing fallback user context...");
+      console.log(
+        "getUserContext: Other error, providing fallback user context...",
+      );
       return {
         data: {
           id: userId,
@@ -436,13 +476,13 @@ export const getUserContext = async (userId: string) => {
               maxParticipants: 50,
               recordingEnabled: true,
               chatEnabled: true,
-              screenShareEnabled: true
-            }
-          }
+              screenShareEnabled: true,
+            },
+          },
         },
-        error: null
+        error: null,
       };
-      
+
       return { data: null, error };
     }
 
