@@ -206,15 +206,32 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       console.log('Local video started successfully');
 
       // Manually bind video element since video tile observer is not available
-      if (localVideoRef.current) {
-        console.log('localVideoRef.current is available, binding video element...');
-        // Get the local video tile ID (usually 1 for local video)
-        const localTileId = 1;
-        audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
-        console.log('Video element bound manually to tile ID:', localTileId);
-      } else {
-        console.error('localVideoRef.current is null - cannot bind video element');
-      }
+      // Add a retry mechanism since the video element might not be rendered yet
+      let retryCount = 0;
+      const maxRetries = 10;
+      const bindVideoElement = () => {
+        if (localVideoRef.current) {
+          console.log('localVideoRef.current is available, binding video element...');
+          // Get the local video tile ID (usually 1 for local video)
+          const localTileId = 1;
+          audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
+          console.log('Video element bound manually to tile ID:', localTileId);
+          return true;
+        } else {
+          console.log(`localVideoRef.current is null - retry ${retryCount + 1}/${maxRetries}`);
+          retryCount++;
+          if (retryCount < maxRetries) {
+            // Retry after a short delay
+            setTimeout(bindVideoElement, 100);
+            return false;
+          } else {
+            console.error('Failed to bind video element after maximum retries');
+            return false;
+          }
+        }
+      };
+      
+      bindVideoElement();
 
       console.log('Meeting started successfully');
 
