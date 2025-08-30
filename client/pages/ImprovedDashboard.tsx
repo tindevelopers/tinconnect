@@ -12,12 +12,12 @@ import {
   Calendar,
   Bell,
   Settings,
-  LogOut,
   Plus,
   MessageSquare,
   Mic,
   VideoIcon,
 } from "lucide-react";
+import { UserMenu } from "../components/ui/UserMenu";
 import { cn } from "../lib/utils";
 
 // Mock data for demonstration
@@ -34,7 +34,7 @@ const mockUpcomingMeeting = {
 };
 
 export default function ImprovedDashboard() {
-  const { user, userProfile, signOut, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("home");
   const [dashboardTimeout, setDashboardTimeout] = useState(false);
@@ -76,10 +76,7 @@ export default function ImprovedDashboard() {
     return null;
   }
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
+
 
   const handleStartMeeting = () => {
     // Create a new meeting session
@@ -150,13 +147,10 @@ export default function ImprovedDashboard() {
           ))}
         </nav>
 
-        {/* Sign Out */}
-        <button
-          onClick={handleSignOut}
-          className="w-16 h-16 rounded-2xl flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
-        >
-          <LogOut className="w-6 h-6" />
-        </button>
+        {/* User Menu */}
+        <div className="flex items-center justify-center">
+          <UserMenu className="w-16 h-16 rounded-2xl flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors" />
+        </div>
       </div>
 
       {/* Main Content */}

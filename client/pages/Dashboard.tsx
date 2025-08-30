@@ -10,12 +10,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Separator } from '../components/ui/separator';
 import { MeetingDashboard } from '../components/meetings/MeetingDashboard';
 import { VideoMeeting } from '../components/video/VideoMeeting';
-import { Plus, Users, Building, LogOut, User, Video } from 'lucide-react';
+import { Plus, Users, Building, User, Video } from 'lucide-react';
+import { UserMenu } from '../components/ui/UserMenu';
 import { Tenant, User as UserProfile, Meeting } from '../../server/lib/database.types';
 import { CreateTenantRequest, CreateUserRequest } from '@shared/api';
 
 export default function Dashboard() {
-  const { user, userProfile, tenant, signOut } = useAuth();
+  const { user, userProfile, tenant } = useAuth();
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -100,9 +101,7 @@ export default function Dashboard() {
     setSelectedMeeting(null);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+
 
   if (showVideoMeeting && selectedMeeting) {
     return (
@@ -130,21 +129,7 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-4">
-              {userProfile && (
-                <div className="flex items-center space-x-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={userProfile.avatar_url || undefined} />
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm text-gray-700">{userProfile.name}</span>
-                </div>
-              )}
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>
