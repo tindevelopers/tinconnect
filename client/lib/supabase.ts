@@ -39,6 +39,8 @@ export const signUp = async (email: string, password: string, userData: {
   if (!checkEnvVars()) {
     return { data: null, error: { message: 'Supabase not configured' } };
   }
+
+  // First, try to sign up the user
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -47,6 +49,17 @@ export const signUp = async (email: string, password: string, userData: {
       emailRedirectTo: undefined // Disable email confirmation for now
     }
   });
+
+  // If successful and user exists, try to auto-confirm them
+  if (data.user && !error) {
+    try {
+      // Auto-confirm the user by updating their email_confirmed_at field
+      await supabase.rpc('confirm_user_email', { user_id: data.user.id });
+    } catch (confirmError) {
+      console.log('Auto-confirmation failed, but signup succeeded:', confirmError);
+    }
+  }
+
   return { data, error };
 };
 
