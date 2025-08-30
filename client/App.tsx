@@ -19,6 +19,7 @@ import EnhancedMeeting from "./pages/EnhancedMeeting";
 import StartMeetingPage from "./pages/StartMeetingPage";
 import MediaTest from "./pages/MediaTest";
 import ParticipantListDemo from "./components/meetings/ParticipantListDemo";
+import EnhancedMeetingDemo from "./pages/EnhancedMeetingDemo";
 import NotFound from "./pages/NotFound";
 
 import "./global.css";
@@ -83,6 +84,7 @@ function AppRoutes() {
         />
         <Route path="/media-test" element={<MediaTest />} />
         <Route path="/participant-demo" element={<ParticipantListDemo />} />
+        <Route path="/enhanced-meeting-demo" element={<EnhancedMeetingDemo />} />
         <Route
           path="/dashboard"
 
