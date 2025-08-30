@@ -63,14 +63,14 @@ const navigationItems = [
   }
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  className, 
+export const Sidebar: React.FC<SidebarProps> = ({
+  className,
   activeItem = 'meetings',
   onItemClick
 }) => {
   return (
     <div className={cn(
-      "w-80 bg-white shadow-lg border-r border-gray-200 h-full",
+      "w-80 bg-white shadow-lg border-r border-gray-200 h-full relative",
       className
     )}>
       <div className="p-6">
@@ -115,11 +115,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
       
-      {/* Download App Button */}
+      {/* Download App Button - moved to header */}
       <div className="absolute bottom-6 left-6 right-6">
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors">
-          Download Desktop App
-        </button>
       </div>
     </div>
   );

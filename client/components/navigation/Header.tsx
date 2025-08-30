@@ -48,24 +48,29 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center space-x-8">
           {/* Action Buttons */}
           <div className="flex items-center space-x-6">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-blue-700 hover:text-blue-800 hover:bg-blue-50 font-semibold uppercase tracking-wide"
             >
               START
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-blue-700 hover:text-blue-800 hover:bg-blue-50 font-semibold uppercase tracking-wide"
             >
               JOIN
             </Button>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-blue-700 hover:text-blue-800 hover:bg-blue-50 font-semibold uppercase tracking-wide"
             >
               SCHEDULE
             </Button>
+          </div>
+
+          {/* Download Desktop App Button */}
+          <div className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+            Download Desktop App
           </div>
 
           {/* User Profile */}

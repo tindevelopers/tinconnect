@@ -304,22 +304,23 @@ export default function EnhancedDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar 
-        activeItem={activeSection}
-        onItemClick={handleSidebarItemClick}
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header - Full Width */}
+      <Header
+        user={userProfile ? { name: userProfile.name, avatar_url: userProfile.avatar_url } : undefined}
+        tenant={currentTenant ? { name: currentTenant.name } : undefined}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <Header 
-          user={userProfile ? { name: userProfile.name, avatar_url: userProfile.avatar_url } : undefined}
-          tenant={currentTenant ? { name: currentTenant.name } : undefined}
+      {/* Content Area with Sidebar and Main Content */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <Sidebar
+          activeItem={activeSection}
+          onItemClick={handleSidebarItemClick}
+          className="h-[calc(100vh-72px)]"
         />
 
-        {/* Content */}
+        {/* Main Content */}
         <main className="flex-1 p-8">
           {renderContent()}
         </main>
