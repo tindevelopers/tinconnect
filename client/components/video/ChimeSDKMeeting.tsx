@@ -61,39 +61,53 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
 
   const initializeMeetingSession = async (meetingConfig: any) => {
     try {
+      console.log('=== initializeMeetingSession function called ===');
       console.log('Initializing meeting session with config:', meetingConfig);
 
       // Create logger
+      console.log('Creating logger...');
       loggerRef.current = new ConsoleLogger('ChimeSDKMeeting', LogLevel.INFO);
+      console.log('Logger created successfully');
 
       // Create device controller
+      console.log('Creating device controller...');
       const deviceController = new DefaultDeviceController(loggerRef.current, {
         enableWebAudio: true,
         enableUnifiedPlanForChromiumBasedBrowsers: true,
       });
+      console.log('Device controller created successfully');
 
       // Create meeting session configuration
+      console.log('Creating meeting session configuration...');
       const configuration = new MeetingSessionConfiguration(
         meetingConfig.meeting,
         meetingConfig.attendee,
         deviceController
       );
+      console.log('Meeting session configuration created successfully');
 
       // Create meeting session
+      console.log('Creating meeting session...');
       const meetingSession = new DefaultMeetingSession(
         configuration,
         loggerRef.current,
         deviceController
       );
+      console.log('Meeting session created successfully');
 
       // Store the audio video facade
+      console.log('Storing audio video facade...');
       audioVideoRef.current = meetingSession.audioVideo;
+      console.log('Audio video facade stored successfully');
 
       // Set up observers
+      console.log('Setting up observers...');
       setupObservers();
 
       // Start the meeting
+      console.log('Starting the meeting...');
       await startMeeting();
+      console.log('Meeting start initiated successfully');
 
     } catch (error) {
       console.error('Error initializing meeting session:', error);
@@ -159,31 +173,44 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
   };
 
   const startMeeting = async () => {
-    if (!audioVideoRef.current) return;
+    console.log('=== startMeeting function called ===');
+    if (!audioVideoRef.current) {
+      console.error('audioVideoRef.current is null - cannot start meeting');
+      return;
+    }
 
     try {
       console.log('Starting meeting...');
 
       // Check permissions before starting
+      console.log('Checking permissions...');
       const hasPermissions = await checkAvailableDevices();
+      console.log('Permissions check result:', hasPermissions);
       if (!hasPermissions) {
+        console.error('Permissions check failed');
         setIsConnecting(false);
         return;
       }
 
       // Start audio video
+      console.log('Starting audio video...');
       await audioVideoRef.current.start();
+      console.log('Audio video started successfully');
 
       // Start local video
+      console.log('Starting local video tile...');
       audioVideoRef.current.startLocalVideoTile();
       console.log('Local video started successfully');
 
       // Manually bind video element since video tile observer is not available
       if (localVideoRef.current) {
+        console.log('localVideoRef.current is available, binding video element...');
         // Get the local video tile ID (usually 1 for local video)
         const localTileId = 1;
         audioVideoRef.current.bindVideoElement(localTileId, localVideoRef.current);
-        console.log('Video element bound manually');
+        console.log('Video element bound manually to tile ID:', localTileId);
+      } else {
+        console.error('localVideoRef.current is null - cannot bind video element');
       }
 
       console.log('Meeting started successfully');
