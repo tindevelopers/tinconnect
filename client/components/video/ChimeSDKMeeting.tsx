@@ -47,8 +47,28 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
         audio: true
       });
       
+      // Get available devices
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const audioDevices = devices.filter(device => device.kind === 'audioinput');
+      
+      console.log('Available video devices:', videoDevices);
+      console.log('Available audio devices:', audioDevices);
+      
       // Stop the test stream
       stream.getTracks().forEach(track => track.stop());
+      
+      // If we have a device controller, set the default devices
+      if (audioVideoRef.current) {
+        if (videoDevices.length > 0) {
+          console.log('Setting default video device:', videoDevices[0].deviceId);
+          await audioVideoRef.current.chooseVideoInputDevice(videoDevices[0].deviceId);
+        }
+        if (audioDevices.length > 0) {
+          console.log('Setting default audio device:', audioDevices[0].deviceId);
+          await audioVideoRef.current.chooseAudioInputDevice(audioDevices[0].deviceId);
+        }
+      }
       
       console.log('Camera and microphone permissions granted');
       return true;
@@ -103,6 +123,10 @@ const ChimeSDKMeeting: React.FC<ChimeSDKMeetingProps> = ({ meeting, onLeave }) =
       // Set up observers
       console.log('Setting up observers...');
       setupObservers();
+
+      // Set up devices after meeting session is created
+      console.log('Setting up devices...');
+      await checkAvailableDevices();
 
       // Start the meeting
       console.log('Starting the meeting...');
