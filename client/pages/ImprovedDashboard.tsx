@@ -78,9 +78,9 @@ export default function ImprovedDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {/* Sidebar */}
-      <div className="w-32 bg-white border-r border-gray-200 flex flex-col items-center py-6">
+      <div className="w-full lg:w-32 bg-white border-r border-gray-200 flex lg:flex-col flex-row items-center justify-around lg:justify-start py-6 lg:space-y-4 space-x-4 lg:space-x-0">
         {/* Logo */}
         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-8">
           <div className="w-8 h-8 bg-white rounded-lg"></div>
